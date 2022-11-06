@@ -5,16 +5,20 @@
 #include <glm/vec3.hpp>
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
+#include <Unified-Engine/Objects/Components/transform.h>
 
 namespace UnifiedEngine
 {
     class Camera : public ObjectComponent{
+      friend ObjectComponent;
+    protected:
+      Transform transformOld = {};
+    
     public:
         glm::mat4 ViewMatrix;
         glm::mat4 ProjectionMatrix;
 
-        glm::vec3 Position;
-        glm::vec3 Rotation;
+        Transform transform = {};
 
         //Perspective Matrix
 		float FOV;

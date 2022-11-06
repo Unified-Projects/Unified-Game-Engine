@@ -11,6 +11,7 @@ namespace UnifiedEngine
 {
     class GameObject : public ObjectComponent{
         friend ShaderObject;
+        friend ObjectComponent;
     protected:
         //Buffers
 		GLuint VAO = 0;
@@ -24,10 +25,13 @@ namespace UnifiedEngine
         glm::mat4 ModelMatrix;
     protected: //Math and Mesh Functions
         int GenerateVAOBuffers();
+
+        bool NoShader = true;
+        Transform transformOld = {};
         
     public:
         //Game Object Specifics
-        Transform transform = {}; 
+        Transform transform = {};
 
         std::string Name = "";
         std::string Tag = "";

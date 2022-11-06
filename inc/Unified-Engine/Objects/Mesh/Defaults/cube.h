@@ -4,8 +4,9 @@
 
 namespace UnifiedEngine
 {
-    struct Cube : Mesh{
-        std::vector<Vertex> vertices = {
+    struct Cube : public Mesh{
+        inline Cube(){
+            this->vertices = {
             //Position                              //Color                 //Texcoords                   //Normals                 
             //Front
             Vertex{glm::vec3(-.5f, .5f, .5f),       glm::vec3(1.0f),        glm::vec2(0, 1),              glm::vec3(0.f, 0.f, -1.f)},
@@ -45,7 +46,7 @@ namespace UnifiedEngine
         };
 
         //Indices
-        std::vector<GLuint> indicies = {
+        this->indices = {
             0, 1, 2,
             0, 2, 3,
 
@@ -64,5 +65,6 @@ namespace UnifiedEngine
             22, 21, 20,
             23, 22, 20
         };
+        }
     };
 } // namespace UnifiedEngine

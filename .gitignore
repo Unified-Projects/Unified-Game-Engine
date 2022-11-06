@@ -1,47 +1,11 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-build/
-libs/
-.vscode/
-
+.vscode
+build
+libs
+inc/AL
+inc/ALUT
+inc/freetype
+inc/glad
+inc/GLFW
+inc/GLM
+inc/SOIL2
 src/glad.c
-
-inc/AL/
-inc/ALUT/
-inc/freetype/
-inc/glad/
-inc/GLFW/
-inc/GLM/
-inc/SOIL2/
-inc/UnifiedEngine/

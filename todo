@@ -1,0 +1,35 @@
+TODO: Cursor Problem As When Scaling The Screen The Mouse Still thinks the screen size is the original which would mess up resizing and mouse mobility when not locked
+
+TODO: Framebuffer resize callback to get the new window size when the window is resized
+
+TODO: Vsync issue causing white screen with it dissabled (Look itno glfwSwapBuffers)
+
+TODO: Instance Search for game objects of name and type
+
+TODO: Update Texture2D method to use texture atlas
+
+TODO: When adding a Texture2D to a atlas then loading the atlas to a texture2D remove all included Texture2D (in the atlas) from the _GLOBAL_atlas to save image space
+
+TODO: Only Bind/Unbind if it is required and there are more then one texture
+
+TODO: Repeatedly remove and update a texure to ensure data gets removed from memory
+
+TODO: in remove image create a a way of adding the space to the atlas space indexer so more images can be added
+
+TODO: Look into issue caused when there is no image found!
+
+TODO: Allow UVs to be mapped to the texture accoring to model (Maintaining shape and not just a square)
+
+TODO: RigidBody allow run if colllided
+
+TODO: SurfacesOf different Frictions
+
+TODO: When a object is removed and initialised take into consideration parent and Transform and children so that they all get changed and found.
+
+TODO: in UpdateC of ObjectComponents add the affecting of transforms into considerations.
+
+TODO: Check if object being destroyed is the main camera. If so remove it from GetMainCamera() and ensure there is another camera before removing it;
+
+TODO: Make a global active texture number so that the atlas can be more efficient in swapping altas when rendering multiple objects with textures
+
+NOTE: Some UVs can be ordered wrong!

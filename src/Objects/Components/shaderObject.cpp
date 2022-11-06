@@ -57,11 +57,20 @@ int SendArg(Shader* shader, ShaderArguments arg){
     default:
         return -1;
     }
-};
+
+    return 0;
+}
 
 int ShaderObject::PassArgs(){
+
+    for (auto i = this->Children.begin(); i != this->Children.end(); i++) {
+        if((*i)->type == OBJECT_MATERIAL){
+            (*i)->Update();
+        }
+    }
+
     for (auto i = this->Arguments.begin(); i != this->Arguments.end(); i++) {
-        ShaderArguments arg = *i;
+        ShaderArguments arg = (*i);
 
         if(SendArg(this->shader, arg)){
             FAULT("FAILED TO PARSE ARGUMENT");
@@ -73,7 +82,7 @@ int ShaderObject::PassArgs(){
     if(Parent->type != OBJECT_GAME_OBJECT){
         FAULT("Cannot read non-gameobject");
         return -1;
-    }else if(__GAME__GLOBAL__INSTANCE__->camera == nullptr){
+    }else if(__GAME__GLOBAL__INSTANCE__->GetMainCamera() == nullptr){
         FAULT("Cannot read from camera object. Is it present?");
         return -1;
     }else if(__GAME__GLOBAL__INSTANCE__->__windows.size() == 0){
@@ -85,7 +94,7 @@ int ShaderObject::PassArgs(){
 
     //Matricies
     SendArg(this->shader, {.dataLoc=&(ParentObj->ModelMatrix), .type=SHADER_ARG_MAT4, .name="ModelMatrix"});
-    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->camera->ViewMatrix), .type=SHADER_ARG_MAT4, .name="ViewMatrix"});
+    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->ViewMatrix), .type=SHADER_ARG_MAT4, .name="ViewMatrix"});
     SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->ProjectionMatrix), .type=SHADER_ARG_MAT4, .name="ProjectionMatrix"});
 
     //GameObject
@@ -93,9 +102,9 @@ int ShaderObject::PassArgs(){
     SendArg(this->shader, {.dataLoc=&(ParentObj->transform.Rotation), .type=SHADER_ARG_VEC3, .name="ObjectRotation"});
 
     //Camera
-    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->camera->Position), .type=SHADER_ARG_VEC3, .name="CameraPosition"});
-    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->camera->Rotation), .type=SHADER_ARG_VEC3, .name="CameraRotation"});
-    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->camera->ViewFront), .type=SHADER_ARG_VEC3, .name="CameraFront"});
+    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Position), .type=SHADER_ARG_VEC3, .name="CameraPosition"});
+    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation), .type=SHADER_ARG_VEC3, .name="CameraRotation"});
+    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->ViewFront), .type=SHADER_ARG_VEC3, .name="CameraFront"});
 
     return 0;
 }

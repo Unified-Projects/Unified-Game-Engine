@@ -59,9 +59,15 @@ GameObject::GameObject(Mesh _mesh, ShaderObject* _shader)
     this->mesh = std::move(_mesh);
     this->shader = _shader;
 
-    this->shader->Parent = this;
+    this->transformOld = this->transform;
 
-    this->GenerateVAOBuffers();
+    if(this->shader){
+        this->shader->Parent = this;
+        this->NoShader = false;
+    }
+
+    if(this->mesh.vertices.size())
+        this->GenerateVAOBuffers();
 }
 
 GameObject::GameObject(GameObject* _parent, Mesh _mesh, ShaderObject* _shader)
@@ -70,11 +76,18 @@ GameObject::GameObject(GameObject* _parent, Mesh _mesh, ShaderObject* _shader)
     //Initialse Values
     this->mesh = std::move(_mesh);
     this->shader = _shader;
-    
-    this->shader->Parent = this;
-    this->Parent->Children.push_back(this);
 
-    this->GenerateVAOBuffers();
+    this->transformOld = this->transform;
+    
+    if(this->shader){
+        this->shader->Parent = this;
+        this->NoShader = false;
+    }
+
+    // this->Parent->Children.push_back(this);
+
+    if(this->mesh.vertices.size())
+        this->GenerateVAOBuffers();
 }
 
 GameObject::~GameObject(){
@@ -86,7 +99,7 @@ glm::mat4 CalculateModelMatrix(Transform transform, glm::vec3 origin){
     glm::mat4 Matrix(1.f);
 
     //Translations
-    //Matrix = translate(Matrix, transform.Position);
+    // Matrix = translate(Matrix, transform.Position);
     Matrix = glm::translate(Matrix, origin);
     Matrix = glm::rotate(Matrix, glm::radians(transform.Rotation.x), glm::vec3(1.f, 0.f, 0.f));
     Matrix = glm::rotate(Matrix, glm::radians(transform.Rotation.y), glm::vec3(0.f, 1.f, 0.f));
@@ -99,9 +112,20 @@ glm::mat4 CalculateModelMatrix(Transform transform, glm::vec3 origin){
 }
 
 int GameObject::Update(){
-    //TODO: Implement follow Parent in both rotation and movement (Propper Rotation Physics)
+    //TODO: Implement follow Parent in both rotation and movement (Propper Rotation Around Parent Physics)
 
     this->ModelMatrix = CalculateModelMatrix(this->transform, this->transform.Position);
+    // this->ModelMatrix = CalculateModelMatrix(this->transform, glm::vec3(0.0f));
+
+    //Children
+    this->UpdateC();
+
+    if(this->NoShader && this->shader){
+        this->NoShader = false;
+        this->shader->Parent = this;
+    }
+
+    this->transformOld = this->transform;
 
     return 0;
 }
@@ -109,23 +133,32 @@ int GameObject::Update(){
 int GameObject::Render(){
     if (this->Enabled) {
         //Update Shader Values
-        this->shader->PassArgs();
-        
+        if(this->shader)
+            this->shader->PassArgs();
+
         //Load Shader
-        this->shader->Toggle();
+        if(this->shader)
+            this->shader->Toggle();
 
-        //Bind Buffers
-        glBindVertexArray(this->VAO);
-        
-        //Use Method Based on Indicies or not
-        if (this->mesh.indices.size() > 0)
-            glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
-        else
-            glDrawArrays(GL_TRIANGLES, 0, this->mesh.vertices.size());
+        if(this->mesh.vertices.size()){
+            //Bind Buffers
+            glBindVertexArray(this->VAO);
+            
+            //Use Method Based on Indicies or not
+            if (this->mesh.indices.size() > 0)
+                glDrawElements(GL_TRIANGLES, this->mesh.indices.size(), GL_UNSIGNED_INT, 0);
+            else
+                glDrawArrays(GL_TRIANGLES, 0, this->mesh.vertices.size());
 
-        //Clearing
-        glBindVertexArray(0);
-        this->shader->Toggle();
+            //Clearing
+            glBindVertexArray(0);
+        }
+
+        if(this->shader)
+            this->shader->Toggle();
+
+        //Children
+        this->RenderC();
     }
 
     return 0;
