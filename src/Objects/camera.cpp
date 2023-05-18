@@ -1,5 +1,6 @@
 #include <Unified-Engine/Objects/camera.h>
 #include <Unified-Engine/Objects/GameObject.h>
+#include <Unified-Engine/debug.h>
 
 #include <GLM/glm.hpp>
 #include <GLM/vec2.hpp>
@@ -36,6 +37,8 @@ Camera::Camera()
     this->ViewFront = glm::vec3(0.f);
     this->ViewRight = glm::vec3(0.f);
     this->ViewUp = glm::vec3(0.f);
+
+    this->OldAdjustedRotation = glm::vec3(-0.43f, 0.43f, -0.43f);
 }
 
 Camera::~Camera(){
@@ -59,6 +62,8 @@ int Camera::Update(){
         this->ViewFront.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
     }
 
+    // LOG("VIEW FRONT: ", ViewFront.x, " ", ViewFront.y, " ", ViewFront.z);
+
     //Assigning
     this->ViewFront = normalize(this->ViewFront);
 
@@ -69,7 +74,11 @@ int Camera::Update(){
     this->front.y = this->front.y;
     this->front.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
 
+    // LOG("ViewUP: ", ViewUp.x, " ", ViewUp.y, " ", ViewUp.z);
+
     this->front = normalize(this->front);
+
+    // LOG("Post-FRONT: ", front.x, " ", front.y, " ", front.z);
 
     this->right = normalize(cross(this->front, this->worldUp));
     this->up = normalize(cross(this->right, this->front));
@@ -82,6 +91,7 @@ int Camera::Update(){
     this->UpdateC();
 
     this->transformOld = this->transform;
+    this->ViewFrontOld = this->ViewFront;
     
     return 0;
 }

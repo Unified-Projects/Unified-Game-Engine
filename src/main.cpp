@@ -208,8 +208,8 @@ int main()
     UnifiedEngine::Shader* child_shader = new Shader("./rsc/testVertex.glsl", "./rsc/testFragment.glsl");
     UnifiedEngine::ShaderObject* child_shaderObj = new ShaderObject(child_shader);
     UnifiedEngine::GameObject* child_gOBJ = new GameObject(*child_mesh, child_shaderObj);
-    child_gOBJ->transform.Position = glm::vec3(-1, 0, 0);
-    // child_gOBJ->transform.Rotation = Rot;
+    child_gOBJ->transform.Position = glm::vec3(0, 0, -5);
+    child_gOBJ->transform.Rotation = glm::vec3(0, 0, 0);
     // child_gOBJ->transform.Scale = Scale;
 
     child_gOBJ->Parent = &Cam;
@@ -224,6 +224,9 @@ int main()
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(10);
         }
+
+        // gOBJ.transform.Rotation.x += 10 * Time.DeltaTime;
+        // gOBJ.transform.Rotation.z += 10 * Time.DeltaTime;
 
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Render()){
             FAULT("GAME_INSTANCE::FAILED TO RENDER!");

@@ -13,6 +13,8 @@ namespace UnifiedEngine
       friend ObjectComponent;
     protected:
       Transform transformOld = {};
+      glm::vec3 ViewFrontOld = {};
+      glm::vec3 OldAdjustedRotation = glm::vec3(-0.43f, 0.43f, -0.43f);
     
     public:
         glm::mat4 ViewMatrix;

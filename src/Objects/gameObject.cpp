@@ -112,8 +112,6 @@ glm::mat4 CalculateModelMatrix(Transform transform, glm::vec3 origin){
 }
 
 int GameObject::Update(){
-    //TODO: Implement follow Parent in both rotation and movement (Propper Rotation Around Parent Physics)
-
     this->ModelMatrix = CalculateModelMatrix(this->transform, this->transform.Position);
     // this->ModelMatrix = CalculateModelMatrix(this->transform, glm::vec3(0.0f));
 
