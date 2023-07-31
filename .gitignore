@@ -1,11 +1,3 @@
 .vscode
 build
-libs
-inc/AL
-inc/ALUT
-inc/freetype
-inc/glad
-inc/GLFW
-inc/GLM
-inc/SOIL2
-src/glad.c
+*.bat

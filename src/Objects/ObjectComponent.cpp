@@ -72,7 +72,7 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     //Intialiser
     glm::mat4 Matrix(1.f);
 
-    glm::vec3 Rotation = (newT.Rotation); //  - oldT.Rotation
+    glm::vec3 Rotation = (newT.Rotation - oldT.Rotation); //  - oldT.Rotation
     glm::vec3 Origin = newT.Position;
 
     // Convert the View Forward Normalised Values into 3 different angles (We know one already)
@@ -96,7 +96,7 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
 
         // Adjusted.x = Rotation.x * MultiplyerX;
 
-        float MultiplyerZ = (FrontNew.z)/((FrontNew.x) + (FrontNew.z));
+        /*float MultiplyerZ = (FrontNew.z)/((FrontNew.x) + (FrontNew.z));
         Adjusted.x = Rotation.x * MultiplyerZ;
 
         // // X
@@ -104,7 +104,7 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
         Adjusted.z = Rotation.x * MultiplyerX;
 
         Adjusted.x = Rotation.x;
-        Adjusted.z = 0;
+        Adjusted.z = 0;*/     
 
         // Using Trig
         /*float X2 = FrontNew.x * FrontNew.x;
@@ -119,9 +119,7 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
 
         Adjusted.x = glm::degrees(acos(FrontNew.x/VMagnitude)) - 90;
         Adjusted.y = glm::degrees(acos(FrontNew.z/VMagnitude)) - 90;
-        Adjusted.z = glm::degrees(acos(FrontNew.y/VMagnitude)) - 90;*/
-
-        
+        Adjusted.z = glm::degrees(acos(FrontNew.y/VMagnitude)) - 90;*/       
 
         // float MultiplyerX = ((FrontNew.y + FrontOld.y) / 2);
         // float MultiplyerZ = 1 - ((FrontNew.y + FrontOld.y) / 2);
@@ -129,28 +127,90 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
         // Adjusted.x = Rotation.x * MultiplyerX;
         // Adjusted.z = Rotation.x * MultiplyerZ;
 
+    // New Method - Use Y purely
+    
+    // First Create the multiplier config
+    glm::vec3 RotationMultiplyer(1.f);
+
+    // Important to make sure all angles are now a nice 0 <= X < 360
+    // Pretty easy fix
+    while (Rotation.x >= 360 || Rotation.x < 0 || Rotation.y >= 360 || Rotation.y < 0){
+        Rotation.x += 360;
+        Rotation.y += 360;
+        
+        Rotation.x -= 360 * (Rotation.x >= 360);
+        Rotation.y -= 360 * (Rotation.y >= 360);
+    }
+
+    // Now map ratios
+        // 90 = x (Cos() = 0)
+        // 180 = -x (Sin() = 0)
+        
+        // 0 = z (Sin() = 0)
+        // 270 = -z (Cos() = 0)
+
+    // TODO REGIONS DO NOT CONFORM TO THE EXPECTED 90 DEGREES
+        // From what I can tell, the ranges are wrong
+        // However in the case of Axis alligned this is pretty close!
+
+        // This gives us 4 Quartiles of multipliers
+
+    // float MultiplyerZ = (abs(FrontNew.x) / (abs(FrontNew.x) + abs(FrontNew.z)));
+    // float MultiplyerX = (abs(FrontNew.z) / (abs(FrontNew.x) + abs(FrontNew.z)));
+
+    // Use of Trig
+        // Angle Between X and Z is Y
+        // Angle Between X and Y is Z 
+        // Angle Between Y and Z is X
+
+    float X2 = FrontNew.x * FrontNew.x;
+    float Y2 = FrontNew.y * FrontNew.y;
+    float Z2 = FrontNew.z * FrontNew.z;
+
+    // Adjusted.x = glm::degrees(abs(atan(FrontNew.y/FrontNew.z)));
+    // Adjusted.y = glm::degrees(abs(atan(FrontNew.z/FrontNew.x)));
+    // Adjusted.z = glm::degrees(abs(atan(FrontNew.x/FrontNew.y)));
+    Adjusted.x = glm::degrees((atan(FrontNew.x/sqrt(Y2 + Z2))));
+    Adjusted.y = glm::degrees((atan(FrontNew.y/sqrt(X2 + Z2))));
+    Adjusted.z = glm::degrees((atan(FrontNew.z/sqrt(X2 + Y2))));
+
+    float MultiplyerX = Adjusted.x / (abs(Adjusted.x + Adjusted.z));
+    float MultiplyerZ = Adjusted.z / (abs(Adjusted.x + Adjusted.z));
+
+    // if (Adjusted.y < 90){ // -X and -Z
+    //     RotationMultiplyer = glm::vec3(-1.f, 1.f, -1.f);
+    // }
+    // else if (Adjusted.y < 180){ // -x and +z 
+        // RotationMultiplyer = glm::vec3(-1.f, 1.f, 1.f);
+    // }
+    // else if (Adjusted.y < 270){ // +X and +Z
+    //     RotationMultiplyer = glm::vec3(1.f, 1.f, 1.f);
+    // }
+    // else{ // +X and -Z
+    //     RotationMultiplyer = glm::vec3(1.f, 1.f, -1.f);
+    // }
+
+    // if (Adjusted.y < 180){ // -x and +z 
+        // RotationMultiplyer = glm::vec3(-1.f, 1.f, 1.f);
+    // }
+    
+    Adjusted.x = Rotation.x * MultiplyerZ * -1;
+    Adjusted.y = Rotation.y;
+    Adjusted.z = Rotation.x * MultiplyerX;
+
+    Adjusted.x = 0;
+    Adjusted.z = 0;
+
+    // TODO Lets purely rely on the multiplier so no need to adjust :) Means we can cut a lot out
+
     if (Bufferer > 500){
-        Bufferer = 0;
-
-        // Convert the View Forward Normalised Values into 3 different angles (We know one already)
-        glm::vec3 Adjusted2(0.f);
-
-        // Y axis (Easy)
-        Adjusted2.y = newT.Rotation.y;
-
-        // X and Z (Hard <= 89 degrees)
-            // Z
-
-        //    Adjusted2.z = newT.Rotation.x * MultiplyerZ;
-
-            // X
-
-        //    Adjusted2.x = newT.Rotation.x * MultiplyerX;
+        // Bufferer = 0;
 
         LOG("Front: ", FrontNew.x, " ", FrontNew.y, " ", FrontNew.z);
-        LOG("Previous: ", PrevRotation[0].x, " ", PrevRotation[0].y, " ", PrevRotation[0].z);
+        LOG("New: ", newT.Rotation.x, " ", newT.Rotation.y, " ", newT.Rotation.z);
+        LOG("Rotation: ", Rotation.x, " ", Rotation.y, " ", Rotation.z);
         LOG("Adjusted: ", Adjusted.x, " ", Adjusted.y, " ", Adjusted.z);
-        LOG("Diff: ", Adjusted.x - PrevRotation[0].x, " ", Adjusted.y - PrevRotation[0].y, " ", Adjusted.z - PrevRotation[0].z);
+        // LOG("Diff: ", Adjusted.x - PrevRotation[0].x, " ", Adjusted.y - PrevRotation[0].y, " ", Adjusted.z - PrevRotation[0].z);
     }
     else{
         Bufferer++;
@@ -161,27 +221,22 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
         return glm::mat4(1.f);
     }
 
-    // // Roation Directions
-    glm::vec3 RotationMultiplyer(-1.f, 1.f, -1.f);
-    // if(abs((int)(Adjusted.y) % 360) > 180){
-    //     RotationMultiplyer.x = 1;
-    // }
-    // else{
-    //     RotationMultiplyer.x = -1;
-    // }
-
     //Translations
     Matrix = glm::translate(Matrix, Origin - ChildT.Position); // Child -> Origin
     
     // First undo last rotation
-    // Matrix = glm::rotate(Matrix, glm::radians(-PrevRotation[0].x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(-PrevRotation[0].y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(-PrevRotation[0].z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
+    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].x), glm::vec3(-RotationMultiplyer.x, 0.f, 0.f));
+    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].y), glm::vec3(0.f, -RotationMultiplyer.y, 0.f));
+    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].z), glm::vec3(0.f, 0.f, -RotationMultiplyer.z));
 
     // Then apply new
-    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.x-PrevRotation[0].x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.y-PrevRotation[0].y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.z-PrevRotation[0].z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
+    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
+    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
+    Matrix = glm::rotate(Matrix, glm::radians(Adjusted.z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
+
+    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.x-PrevRotation[0].x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
+    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.y-PrevRotation[0].y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
+    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.z-PrevRotation[0].z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
 
     Matrix = glm::translate(Matrix, ChildT.Position - Origin); // Origin -> Chid
 

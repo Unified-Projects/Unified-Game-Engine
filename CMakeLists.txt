@@ -1,9 +1,48 @@
 #Cmake Version Check (Should Decrease to open up more compiler versions)
-cmake_minimum_required(VERSION "3.16.3")
+cmake_minimum_required(VERSION "3.20.0")
 
-#C++ version
-set(CMAKE_CXX_STANDARD 17)
+# Global Compiler Flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++20 -fpermissive") # TODO: May cause issues
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Allow external libraries
+include(ExternalProject)
+set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
+include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
+link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
+
+# Open-GL setups
+ExternalProject_Add(OpenGL # Using 4.6 So no macOS support RN (They dont really like OpenGl anyways)
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
+    UPDATE_COMMAND  ""
+)
+
+# SOIL2 setups
+ExternalProject_Add(SOIL2
+    GIT_REPOSITORY https://github.com/SpartanJ/SOIL2.git
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
+    UPDATE_COMMAND  ""
+)
+
+# GLM OpenGL Mathematics
+ExternalProject_Add(GLM
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
+    UPDATE_COMMAND  ""
+)
+
+# FreeType2 font library
+ExternalProject_Add(FreeType2
+    GIT_REPOSITORY https://github.com/freetype/freetype
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_LOCATION}
+    UPDATE_COMMAND  ""
+)
+
+# TODO: Port to a library
 
 #Main Project Init
 project("Main")
@@ -14,40 +53,27 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/Build)
 #For Include referencing
 include_directories(${PROJECT_SOURCE_DIR}/inc/)
 
-#Compiler Type Windows
-if (WIN32)
-    #Windows Specific Libraries
-    LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/Windows)
-
-    #Auido Library
-    # file(COPY ${PROJECT_SOURCE_DIR}/lib/OpenAL32.dll DESTINATION ${PROJECT_SOURCE_DIR}/build/)
-endif (WIN32)
-
 #For Threading Find and use
 find_package (Threads REQUIRED)
 add_compile_options()
-
-#Main Compile Flags for C++
-list(APPEND CMAKE_CXX_FLAGS "-O3 -pthread ${CMAKE_CXX_FLAGS} -static -fpermissive")
 
 #Console Hiding
 #-mwindows
 
 #Search for files
-file(GLOB_RECURSE SOURCES_CPP RELATIVE ${CMAKE_SOURCE_DIR} "src/*.cpp")
-file(GLOB_RECURSE SOURCES_C RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
+file(GLOB_RECURSE SRC
+${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.c*
+)
+file(GLOB_RECURSE SRC
+${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
+)
 
 #Attach Main Files
-add_executable("${PROJECT_NAME}" ${SOURCES_CPP} ${SOURCES_C})
+add_executable(${PROJECT_NAME} ${SRC}) 
 
-#Compiler Type Windows
-if (WIN32)
-    #Windows Specific Libraries
-    LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/libs/Windows)
+# Find the OpenGL library depening on compiler
+find_package(OpenGL REQUIRED)
 
-    #Auido Library
-    # file(COPY ${PROJECT_SOURCE_DIR}/lib/OpenAL32.dll DESTINATION ${PROJECT_SOURCE_DIR}/build/)
-
-    #Link Main Libraries OpenAL32 Needed later
-    TARGET_LINK_LIBRARIES("${PROJECT_NAME}" stdc++ soil2 freetype glfw3 opengl32 gdi32 gdiplus pthread ${CMAKE_THREAD_LIBS_INIT})
-endif (WIN32)
+# Link libraries and require exteral first
+add_dependencies(${PROJECT_NAME} SOIL2 GLM FreeType2 OpenGL)
+target_link_libraries(${PROJECT_NAME} soil2 glfw3 ${OPENGL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
