@@ -31,7 +31,7 @@ namespace UnifiedEngine
     public:
         std::string name = "";
 
-        Shader(const char* vertexFile, const char* fragmentFile, const char* geometryFile = "");
+        Shader(const char* vertexFile = nullptr, const char* fragmentFile = nullptr, const char* geometryFile = nullptr);
 
 		~Shader();
 

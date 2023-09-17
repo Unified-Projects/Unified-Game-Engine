@@ -4,6 +4,10 @@
 
 namespace UnifiedEngine
 {
+    // Standard shaders
+    const char* STANDARD_VERTEXT_SHADER_CODE = "#version 460\n\nlayout (location = 0) in vec3 vertex_position;\nlayout (location = 1) in vec3 vertex_color;\nlayout (location = 2) in vec2 vertex_texcoord;\nlayout (location = 3) in vec3 vertex_normal;\n\nout vec3 vs_position;\nout vec3 vs_color;\nout vec2 vs_texcoord;\nout vec3 vs_normal;\n\nuniform mat4 ModelMatrix;\nuniform mat4 ViewMatrix;\nuniform mat4 ProjectionMatrix;\n\nvoid main(){\n	vs_position = vec4(ModelMatrix * vec4(vertex_position, 1.f)).xyz;\n	vs_color = vertex_color;\n	vs_texcoord = vec2(vertex_texcoord.x, vertex_texcoord.y * -1.f);\n	vs_normal = mat3(ModelMatrix) * vertex_normal;\n\n	gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(vertex_position, 1.f);\n}";
+    const char* STANDARD_FRAGMENT_SHADER_CODE = "#version 460\n\n in vec3 vs_position;\n in vec3 vs_color;\n in vec2 vs_texcoord;\n in vec3 vs_normal;\n\n out vec4 fs_color;\n\n uniform vec3 CameraPosition;\n uniform vec3 CameraFront;\n\nvoid main(){\n	//Final\n	fs_color = vec4(vs_color, 1.f);\n\n	if(fs_color.a==0.0) discard;\n	\n	// fs_color = vec4(1.f, 1.f, 1.f, 1.f);\n}";
+
     //Gen Shader
     std::string Shader::loadShaderSource(const char* fileLoc) {
         std::string temp = "";
@@ -43,7 +47,22 @@ namespace UnifiedEngine
         GLuint shader = glCreateShader(type);
 
         //Load the Src
-        std::string str_src = this->loadShaderSource(fileLoc);
+        std::string str_src;
+        if(fileLoc){
+            str_src = this->loadShaderSource(fileLoc);
+        }
+        else{
+            //Change the src version to correct
+            std::string version = std::to_string(__GLOBAL_CONFIG__.VersionMajor) + std::to_string(__GLOBAL_CONFIG__.VersionMinor) + "0";
+            if(type == GL_VERTEX_SHADER){
+                str_src = STANDARD_VERTEXT_SHADER_CODE;
+            }
+            else{
+                str_src = STANDARD_FRAGMENT_SHADER_CODE;
+            }
+            //Replace Version
+            str_src.replace(str_src.find("#version"), 12, ("#version " + version));
+        }
         const GLchar* Src = str_src.c_str();
 
         //Compile the shader
@@ -98,7 +117,7 @@ namespace UnifiedEngine
         //Load Specific shaders
         vertexShader = this->loadShader(GL_VERTEX_SHADER, vertexFile);
 
-        if (std::strlen(geometryFile) > 3) {
+        if (geometryFile != nullptr) {
             geometryShader = this->loadShader(GL_GEOMETRY_SHADER, geometryFile);
         }
 
