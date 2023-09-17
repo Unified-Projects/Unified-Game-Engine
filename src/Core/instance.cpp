@@ -130,7 +130,8 @@ namespace UnifiedEngine
         this->ProjectionMatrix = glm::perspective(glm::radians(this->GetMainCamera()->FOV), static_cast<float>(this->__windows.front()->Config().res_x) / this->__windows.front()->Config().res_y, this->GetMainCamera()->NearPlane, this->GetMainCamera()->FarPlane);
 
         //Skybox
-        this->skybox->Update();
+        if(this->skybox)
+            this->skybox->Update();
 
         return 0;
     }
@@ -485,6 +486,17 @@ namespace UnifiedEngine
         }
 
         return Result;
+    }
+
+    int instantiate(ObjectComponent* Object){
+        __GAME__GLOBAL__INSTANCE__->objects.push_back(Object);
+
+        return 0;
+    }
+    int destroy(ObjectComponent* Object){
+        __GAME__GLOBAL__INSTANCE__->objects.remove(Object);
+
+        return 0;
     }
 
 } // namespace UnifiedEngine

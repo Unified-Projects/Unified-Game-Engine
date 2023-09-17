@@ -48,7 +48,4 @@ namespace UnifiedEngine
         int Update() override;
         int Render() override;
     };
-
-    int instantiate(GameObject* Object);
-    int destroy(GameObject* Object);
 } // namespace UnifiedEngine

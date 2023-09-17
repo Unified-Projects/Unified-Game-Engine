@@ -3,6 +3,8 @@
 #include <Unified-Engine/debug.h>
 
 #include <GLM/glm.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/gtx/compatibility.hpp>
 #include <GLM/vec2.hpp>
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
@@ -62,8 +64,6 @@ int Camera::Update(){
         this->ViewFront.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
     }
 
-    // LOG("VIEW FRONT: ", ViewFront.x, " ", ViewFront.y, " ", ViewFront.z);
-
     //Assigning
     this->ViewFront = normalize(this->ViewFront);
 
@@ -74,11 +74,7 @@ int Camera::Update(){
     this->front.y = this->front.y;
     this->front.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
 
-    // LOG("ViewUP: ", ViewUp.x, " ", ViewUp.y, " ", ViewUp.z);
-
     this->front = normalize(this->front);
-
-    // LOG("Post-FRONT: ", front.x, " ", front.y, " ", front.z);
 
     this->right = normalize(cross(this->front, this->worldUp));
     this->up = normalize(cross(this->right, this->front));
@@ -87,11 +83,35 @@ int Camera::Update(){
     this->ViewMatrix = glm::mat4(1.f);
     this->ViewMatrix = lookAt(transform.Position, transform.Position + ViewFront, ViewUp);
 
+    { // 3D - Vector rotations
+        // Rotation calculations
+        // Calculate yaw (rotation around y-axis)
+        float yaw = atan2(ViewFront.z, ViewFront.x);
+
+        float pitch = glm::radians(this->transform.Rotation.x); // Original rotation around X-axis
+
+        // Calculate ratio based on the view direction
+        float total = glm::abs(ViewFront.x) + glm::abs(ViewFront.z);
+        float ratioX = glm::abs(ViewFront.x) / total;
+        float ratioZ = glm::abs(ViewFront.z) / total;
+
+        // Split the pitch
+        float new_pitch = pitch * ratioX;
+        float new_roll = pitch * ratioZ;
+        
+        this->AdjustedRotation = glm::vec3(glm::degrees(new_pitch), glm::degrees(yaw), glm::degrees(new_roll));
+
+        if(this->OldAdjustedRotation == glm::vec3(-0.43f, 0.43f, -0.43f)){
+            this->OldAdjustedRotation = this->AdjustedRotation;
+        }
+    }
+
     //Children
     this->UpdateC();
 
+    this->OldAdjustedRotation = AdjustedRotation;
+
     this->transformOld = this->transform;
-    this->ViewFrontOld = this->ViewFront;
     
     return 0;
 }

@@ -51,7 +51,7 @@ project("Main")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/Build)
 
 #For Include referencing
-include_directories(${PROJECT_SOURCE_DIR}/inc/)
+include_directories()
 
 #For Threading Find and use
 find_package (Threads REQUIRED)
@@ -76,4 +76,6 @@ find_package(OpenGL REQUIRED)
 
 # Link libraries and require exteral first
 add_dependencies(${PROJECT_NAME} SOIL2 GLM FreeType2 OpenGL)
-target_link_libraries(${PROJECT_NAME} soil2 glfw3 ${OPENGL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/external/include/freetype)
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/inc/)
+target_link_libraries(${PROJECT_NAME} freetype soil2 glfw3 ${OPENGL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

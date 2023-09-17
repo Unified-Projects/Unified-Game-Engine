@@ -161,14 +161,3 @@ int GameObject::Render(){
 
     return 0;
 }
-
-int UnifiedEngine::instantiate(GameObject* Object){
-    __GAME__GLOBAL__INSTANCE__->objects.push_back(Object);
-
-    return 0;
-}
-int UnifiedEngine::destroy(GameObject* Object){
-    __GAME__GLOBAL__INSTANCE__->objects.remove(Object);
-
-    return 0;
-}

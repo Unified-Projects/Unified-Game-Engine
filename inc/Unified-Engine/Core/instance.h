@@ -70,4 +70,7 @@ namespace UnifiedEngine
     };
 
     extern GameInstance* __GAME__GLOBAL__INSTANCE__;
+
+    int instantiate(ObjectComponent* Object);
+    int destroy(ObjectComponent* Object);
 } // namespace UnifiedEngine
