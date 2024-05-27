@@ -3,11 +3,11 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Unified-Projects/Unified-Game-Engine/blob/main/LICENCE) ![GitHub release (with filter)](https://img.shields.io/github/v/release/Unified-Projects/Unified-Game-Engine)
 
-This project is to understand that core components to a game engine. This invloves the rendering piplines and physics engine.
+This project is to understand that core components to a game engine. This involves the rendering piplines and physics engine.
 
 This project will build a library that can be linked to by your compiler.
 
-**Note: Currently the export is a exe due to the library being in ongoing development and not a relase stage**
+**Note: Currently the export is a exe due to the library being in ongoing development and not a release stage**
 
 ## Documentation
 
