@@ -10,6 +10,7 @@
 #include <list>
 #include <Unified-Engine/input/input.h>
 #include <Unified-Engine/Objects/skybox.h>
+#include <Unified-Engine/Debug/Debugger.h>
 
 namespace UnifiedEngine
 {
@@ -21,6 +22,7 @@ namespace UnifiedEngine
         friend Camera;
         friend ShaderObject;
         friend ObjectComponent;
+        friend Debug::DebugWindow;
     private: //Rendering Stuff
         GLuint Framebuffer = 0;
         GLuint Renderbuffer = 0;
@@ -41,6 +43,9 @@ namespace UnifiedEngine
         glm::mat4 ProjectionMatrix = glm::mat4(1.f);
 
         std::list<ObjectComponent*> objects = {};
+
+    public: // Debug stuff
+        Debug::DebugWindow* debugWindow = nullptr;
 
     protected:
         //Interaction Functions

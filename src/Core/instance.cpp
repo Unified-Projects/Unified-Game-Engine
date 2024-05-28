@@ -117,6 +117,15 @@ namespace UnifiedEngine
         //Update Time Class
         Time.Update();
 
+        // UpdateDebug Window info
+        // Done before content as "DeltaTime" control is possible
+        if(this->debugWindow){
+            this->debugWindow->Update();
+        }
+
+        // Window Context
+        this->__windows.front()->Activate();
+
         //First Update Input
         glfwPollEvents();
 
@@ -152,15 +161,15 @@ namespace UnifiedEngine
             return -1;
         }
 
+        // Window Context
+        this->__windows.front()->Activate();
+
         if(this->Framebuffer)
             glDeleteFramebuffers(1, &this->Framebuffer);
         if(this->Renderbuffer)
             glDeleteRenderbuffers(1, &this->Renderbuffer);
         if(this->Texture)
             glDeleteTextures(1, &this->Texture);
-
-        //Window Context
-        glfwMakeContextCurrent(this->__windows.front()->Context());
 
         //
         // Resolution Stuff
@@ -234,6 +243,11 @@ namespace UnifiedEngine
         // Swap the screen buffers
         if (this->__windows.front()->Config().vsync) {
             glfwSwapBuffers(this->__windows.front()->Context());
+        }
+
+        // Render Debugger
+        if(this->debugWindow){
+            this->debugWindow->Render();
         }
 
         //Incr Counter

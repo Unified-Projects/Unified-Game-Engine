@@ -15,6 +15,13 @@ int Window::Load(){
     if(!__GAME__GLOBAL__INSTANCE__)
         return -1;
 
+    if(__GAME__GLOBAL__INSTANCE__->__windows.size() > 0){
+        // WARN("Multiple Windows Detected, Only One Window Supported");
+        // return -1;
+        // Could be debugger
+        return 1;
+    }
+
     __GAME__GLOBAL__INSTANCE__->__windows.push_back(this);
     this->loaded = true;
 

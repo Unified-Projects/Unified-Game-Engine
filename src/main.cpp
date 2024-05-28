@@ -95,6 +95,7 @@ int main(){
 
     UnifiedEngine::__INIT__ENGINE();
 
+    // Window Setup
     UnifiedEngine::WindowConfig WinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = "Test Program", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
     WinConf.backgroundColor = {0, 0, 0};
 
@@ -125,6 +126,15 @@ int main(){
 
     UnifiedEngine::GameObject CamOBJ(UnifiedEngine::Mesh{}, nullptr);
     CameraControl Controller(&CamOBJ, &Cam);
+
+    // Debug window enable
+    if(true){
+        UnifiedEngine::WindowConfig DbgWinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = "Debugger", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
+        DbgWinConf.backgroundColor = {0, 0, 0};
+
+        UnifiedEngine::Debug::DebugWindow debugWindow(DbgWinConf);
+        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->debugWindow = &debugWindow;
+    }
 
     // Game loop
     while (!glfwWindowShouldClose(GameWindow.Context()))

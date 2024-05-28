@@ -2,9 +2,12 @@
 #include <Unified-Engine/Objects/GameObject.h>
 #include <Unified-Engine/debug.h>
 
+
+// todo : Look into
+// #define GLM_ENABLE_EXPERIMENTAL 1
 #include <GLM/glm.hpp>
 #include <glm/trigonometric.hpp>
-#include <glm/gtx/compatibility.hpp>
+// #include <glm/gtx/compatibility.hpp>
 #include <GLM/vec2.hpp>
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
