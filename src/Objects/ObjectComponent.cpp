@@ -18,7 +18,7 @@
 
 using namespace UnifiedEngine;
 
-ObjectComponent::ObjectComponent(ObjectComponent* _Parent, ObjectComponentType Type, bool Component = false)
+ObjectComponent::ObjectComponent(ObjectComponent* _Parent, ObjectComponentType Type, bool Component)
     : type(Type)
 {
     //Required to for all components (Even GameObjects, but may be set to null for game references)

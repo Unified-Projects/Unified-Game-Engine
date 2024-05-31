@@ -62,16 +62,16 @@ namespace UnifiedEngine
         int Render();
 
     public: //Object Gathering
-        ObjectComponent* GameInstance::GetObjectOfType(ObjectComponentType type);
-        std::list<ObjectComponent*> GameInstance::GetObjectsOfType(ObjectComponentType type);
-        GameObject* GameInstance::GetGameObjectWithName(std::string name);
-        GameObject* GameInstance::GetGameObjectWithTag(std::string tag);
-        std::list<GameObject*> GameInstance::GetGameObjectsWithName(std::string name);
-        std::list<GameObject*> GameInstance::GetGameObjectsWithTag(std::string tag);
-        Camera* GameInstance::GetMainCamera();
+        ObjectComponent* GetObjectOfType(ObjectComponentType type);
+        std::list<ObjectComponent*> GetObjectsOfType(ObjectComponentType type);
+        GameObject* GetGameObjectWithName(std::string name);
+        GameObject* GetGameObjectWithTag(std::string tag);
+        std::list<GameObject*> GetGameObjectsWithName(std::string name);
+        std::list<GameObject*> GetGameObjectsWithTag(std::string tag);
+        Camera* GetMainCamera();
 
     private:
-        int GameInstance::RecuseSearchChild(int Setting, bool multi, void* resultstore, std::list<ObjectComponent*>* StartingPoint, void* argument = nullptr);
+        int RecuseSearchChild(int Setting, bool multi, void* resultstore, std::list<ObjectComponent*>* StartingPoint, void* argument = nullptr);
     };
 
     extern GameInstance* __GAME__GLOBAL__INSTANCE__;
