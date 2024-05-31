@@ -96,7 +96,7 @@ int main(){
     UnifiedEngine::__INIT__ENGINE();
 
     // Window Setup
-    UnifiedEngine::WindowConfig WinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = "Test Program", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
+    UnifiedEngine::WindowConfig WinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Test Program", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
     WinConf.backgroundColor = {0, 0, 0};
 
     UnifiedEngine::Window GameWindow(WinConf);
@@ -129,7 +129,7 @@ int main(){
 
     // Debug window enable
     if(true){
-        UnifiedEngine::WindowConfig DbgWinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = "Debugger", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
+        UnifiedEngine::WindowConfig DbgWinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Debugger", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
         DbgWinConf.backgroundColor = {0, 0, 0};
 
         UnifiedEngine::Debug::DebugWindow debugWindow(DbgWinConf);

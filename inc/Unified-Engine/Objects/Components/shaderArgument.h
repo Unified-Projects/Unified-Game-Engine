@@ -23,7 +23,7 @@ namespace UnifiedEngine
      */
     struct ShaderArguments{
         void* dataLoc = nullptr;
-        ShaderArgType type = -1;
+        ShaderArgType type =  SHADER_ARG_NULL;
         std::string name = "";
     };
 } // namespace UnifiedEngine

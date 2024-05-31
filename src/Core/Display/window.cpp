@@ -78,7 +78,7 @@ Window::Window(WindowConfig config)
 
     //Titlebar
     this->__mainConfig.title = new char[strlen(config.title) + 1];
-    memcpy(this->__mainConfig.title, config.title, strlen(config.title));
+    memcpy((void*)this->__mainConfig.title, (void*)config.title, strlen(config.title));
     this->__mainConfig.title[strlen(config.title)] = 0;
 
     //Window Settings
@@ -127,7 +127,7 @@ int Window::LoadWindowConfig(WindowConfig config){
 
     //Titlebar
     this->__mainConfig.title = new char[strlen(config.title) + 1];
-    memcpy(this->__mainConfig.title, config.title, strlen(config.title));
+    memcpy((void*)this->__mainConfig.title, (void*)config.title, strlen(config.title));
     this->__mainConfig.title[strlen(config.title)] = 0;
 
     //Window Settings
@@ -156,7 +156,7 @@ Window::~Window(){
     this->Unload();
 
     //Clear Needed
-    free(this->__mainConfig.title);
+    free((void*)this->__mainConfig.title);
 }
 
 /**

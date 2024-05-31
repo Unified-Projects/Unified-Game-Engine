@@ -217,7 +217,7 @@ namespace UnifiedEngine
     }
 
     //Setting a mat3 to a unifrom in the shader
-    void Shader::setMat3fv(glm::mat3 value, const GLchar* name, GLboolean transpose = GL_FALSE)
+    void Shader::setMat3fv(glm::mat3 value, const GLchar* name, GLboolean transpose)
     {
         this->use();
 
@@ -228,7 +228,7 @@ namespace UnifiedEngine
     }
 
     //Setting a mat4 to a unifrom in the shader
-    void Shader::setMat4fv(glm::mat4 value, const GLchar* name, GLboolean transpose = GL_FALSE)
+    void Shader::setMat4fv(glm::mat4 value, const GLchar* name, GLboolean transpose)
     {
         this->use();
 

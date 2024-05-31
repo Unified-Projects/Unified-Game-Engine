@@ -271,7 +271,7 @@ namespace UnifiedEngine
         return 0;
     }
     
-    int GameInstance::RecuseSearchChild(int Setting, bool multi, void* resultstore, std::list<ObjectComponent*>* StartingPoint, void* argument = nullptr){
+    int GameInstance::RecuseSearchChild(int Setting, bool multi, void* resultstore, std::list<ObjectComponent*>* StartingPoint, void* argument){
         if(!resultstore){
             FAULT("No Result Location Provided");
             return -1;
@@ -420,7 +420,7 @@ namespace UnifiedEngine
 
                 for(auto i = StartingPoint->begin(); i != StartingPoint->end(); i++){
                     if((*i)->type == OBJECT_CAMERA_OBJECT){
-                        *resultLoc = (*i);
+                        *resultLoc = (Camera*)(*i);
                         return 0;
                     }
 

@@ -78,7 +78,7 @@ namespace UnifiedEngine
 
     public:
         TextureUVs UVs;
-        const TextureUVs& UVsr;
+        const TextureUVs& UVsr; // TODO MOVE TO PROTECTED
         const GLuint& TextID;
         GLuint TextureID;
 

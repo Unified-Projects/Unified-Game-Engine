@@ -161,7 +161,7 @@ int TextureAtlas::AddImage(Texture2D* image){
 
     this->CopyImageData(position.Dest, image->Data, position.pos, glm::ivec2(image->width, image->height));
 
-    (*(std::next(this->Texture2DIdentifiers.begin(), position.index))).push_back(Atlas_Texture_Identifier{position.pos.x, position.pos.y, image->width, image->height, image});
+    (*(std::next(this->Texture2DIdentifiers.begin(), position.index))).push_back(Atlas_Texture_Identifier{(uint32_t)position.pos.x, (uint32_t)position.pos.y, (uint32_t)image->width, (uint32_t)image->height, image});
 
     image->UVs.UV[0] = glm::vec2((position.pos.x) / 4096.0f, 1.f - ((position.pos.y) / 4096.0f)); //0,1
     image->UVs.UV[1] = glm::vec2((position.pos.x + image->width) / 4096.0f, 1.f - ((position.pos.y) / 4096.0f)); //1, 1
@@ -198,7 +198,9 @@ int TextureAtlas::Toggle(Texture2D* image){
     return 0;
 }
 
-Texture2D::Texture2D(std::string FilePath){
+Texture2D::Texture2D(std::string FilePath)
+    : UVsr(UVs), TextID(TextureID)
+{
     if(!__GLOBAL_ATLAS){
         FAULT("ERROR NO ATLAS");
         return;

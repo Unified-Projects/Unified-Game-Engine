@@ -2,7 +2,6 @@
 cmake_minimum_required(VERSION "3.20.0")
 
 # Global Compiler Flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++20 -fpermissive") # TODO: May cause issues
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,7 +44,7 @@ ExternalProject_Add(FreeType2
 # TODO: Port to a library
 
 #Main Project Init
-project("Main")
+project("Main" LANGUAGES CXX C)
 
 #Build Output path
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/Build)
@@ -70,6 +69,15 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*
 
 #Attach Main Files
 add_executable(${PROJECT_NAME} ${SRC}) 
+
+if(MSVC)
+    message(STATUS "Using MSVC compiler")
+    # Add MSVC specific compiler flags
+else()
+    message(STATUS "Using non-MSVC compiler")
+    # Set flags for other compilers
+    target_compile_options(Main PRIVATE "-O3 -std=c++20 -fpermissive")
+endif()
 
 # Find the OpenGL library depening on compiler
 find_package(OpenGL REQUIRED)
