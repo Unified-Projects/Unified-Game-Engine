@@ -31,7 +31,6 @@ namespace UnifiedEngine
         
     public:
         //Game Object Specifics
-        Transform transform = {};
 
         std::string Name = "";
         std::string Tag = "";

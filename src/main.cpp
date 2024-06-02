@@ -148,7 +148,7 @@ int main(){
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(11);
         }
-        gOBJ.transform.Rotate(glm::vec3(90 * UnifiedEngine::Time.DeltaTime, 0, 0));
+        gOBJ.transform.Rotate(glm::vec3(180 * UnifiedEngine::Time.DeltaTime, 135 * UnifiedEngine::Time.DeltaTime, 90 * UnifiedEngine::Time.DeltaTime));
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.

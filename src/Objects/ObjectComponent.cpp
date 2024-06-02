@@ -40,6 +40,12 @@ ObjectComponent::~ObjectComponent(){
 
 int ObjectComponent::Update(){
 
+    this->front = normalize(this->front);
+
+    this->front.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
+    this->front.y = this->front.y;
+    this->front.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
+
     //Children
     this->UpdateC();
 
@@ -54,19 +60,16 @@ int ObjectComponent::Render(){
     return 0;
 }
 
-glm::mat4 CalculationOriginRotation(Transform newT, Transform oldT, Transform ChildT, glm::vec3 RotationMultiplyer = glm::vec3(-1, -1, -1)){
+glm::mat4 CalculationOriginRotation(Transform transform, Transform childTranform, glm::vec3 RotationMultiplyer = glm::vec3(-1, -1, -1)){
     //Intialiser
     glm::mat4 Matrix(1.f);
-
-    glm::vec3 Rotation = (newT.Rotation - oldT.Rotation);
-    glm::vec3 Origin = newT.Position;
+    glm::vec3 Origin = transform.Position;
 
     //Translations
-    Matrix = glm::translate(Matrix, Origin - ChildT.Position); // Child -> Origin
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
-    Matrix = glm::translate(Matrix, ChildT.Position - Origin); // Origin -> Chid
+    Matrix = glm::translate(Matrix, Origin - childTranform.Position); // Child -> Origin
+    auto quaternionRotation = glm::mat4_cast(transform.Quaternion);
+    Matrix = Matrix * quaternionRotation;
+    Matrix = glm::translate(Matrix, childTranform.Position - Origin); // Origin -> Chid
 
     //Return
     return Matrix;
@@ -159,22 +162,18 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     return Matrix;
 }
 
-glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transform childT, Camera* cam) {
+glm::mat4 CalculationCameraOriginRotation(Transform transform, Transform childTransform, Camera* cam) {
 
     glm::vec3 Rotation = (cam->AdjustedRotation - cam->OldAdjustedRotation);
 
     // Initialize the Matrix
     glm::mat4 Matrix(1.f);
 
-    // Relative position of child to the parent
-    glm::vec3 relativePos = childT.Position - newT.Position;
-
     // Translate to parent's position (parent's position), rotate, then translate back
-    Matrix = glm::translate(Matrix, -newT.Position);
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(1.f, 0.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, 1.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(0.f, 0.f, 1.f));
-    Matrix = glm::translate(Matrix, newT.Position);
+    Matrix = glm::translate(Matrix, -transform.Position);
+    auto quaternionRotation = glm::mat4_cast(transform.Quaternion);
+    Matrix = Matrix * quaternionRotation;
+    Matrix = glm::translate(Matrix, transform.Position);
 
     //Return
     return Matrix;
@@ -200,7 +199,7 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     child->transform.Position += parent->transform.Position - parent->transformOld.Position;
 
                     // Calculate the rotation matrix
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);
@@ -250,9 +249,8 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Translate to parent's position, rotate, then translate back
                     Matrix = glm::translate(Matrix, -relativePos);
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(0.f, 0.f, 1.f));
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, 1.f, 0.f));
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(1.f, 0.f, 0.f));
+                    auto quaternionRotation = glm::mat4_cast(parent->transform.Quaternion);
+                    Matrix = Matrix * quaternionRotation;
                     Matrix = glm::translate(Matrix, relativePos);
 
                     // Use Matrix to get the new position of the child
@@ -280,7 +278,7 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Apply rotation
                     // glm::vec3 Rotation = (parent->transform.Rotation - parent->transformOld.Rotation); // Rotation Difference
-                    child->transform.Rotation += Rotation;
+                    child->transform.Rotate(Rotation);
 
                     return 0;
                 }
@@ -302,7 +300,7 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     child->transform.Position += parent->transform.Position - parent->transformOld.Position;
 
                     // Calculate the rotation matrix
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);
@@ -322,7 +320,7 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Calculate the rotation matrix
                     // 
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);

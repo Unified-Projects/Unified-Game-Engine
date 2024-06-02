@@ -18,4 +18,8 @@ namespace UnifiedEngine {
             EulerAngle.z += 360;
         }
     }
+    void NormalizeQuaternion(glm::quat &Quaternion) {
+        float mag = std::sqrt(Quaternion.w * Quaternion.w + Quaternion.x * Quaternion.x + Quaternion.y * Quaternion.y + Quaternion.z * Quaternion.z);
+        Quaternion /= mag;
+    }
 }
