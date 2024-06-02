@@ -50,14 +50,7 @@ public:
         //Update pitch yaw and roll
         UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x += static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime;
         UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y += static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime;
-
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x > 89.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x = 89.f;
-        else if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x < -89.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x = -89.f;
-
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y > 360.f || UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y < -360.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y = 0.f;
+        UnifiedEngine::NormalizeAngles(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation);
 
         //Resolution with scroll
         UnifiedEngine::WindowConfig conf = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->__windows.front()->Config();
