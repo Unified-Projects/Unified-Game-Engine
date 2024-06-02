@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <Unified-Engine/Objects/Components/transform.h>
 #include <GLM/vec3.hpp>
 
 namespace UnifiedEngine

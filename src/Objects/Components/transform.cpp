@@ -23,7 +23,9 @@ namespace UnifiedEngine
     /// @brief Rotates the transform using a quaternion
     /// @param rotation
     void Transform::Rotate(glm::quat rotation) {
+        NormalizeQuaternion(rotation);
         this->Quaternion = rotation * this->Quaternion;
+        NormalizeQuaternion(this->Quaternion);
         this->Rotation = glm::eulerAngles(this->Quaternion);
         this->Rotation.x = glm::degrees(this->Rotation.x);
         this->Rotation.y = glm::degrees(this->Rotation.y);
@@ -35,5 +37,6 @@ namespace UnifiedEngine
         this->Rotation += rotation;
         NormalizeAngles(this->Rotation);
         this->Quaternion = glm::quat(glm::vec3(glm::radians(this->Rotation.x), glm::radians(this->Rotation.y), glm::radians(this->Rotation.z)));
+        NormalizeQuaternion(this->Quaternion);
     }
 } // namespace UnifiedEngine
