@@ -48,8 +48,8 @@ public:
         glm::vec2 mPos = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Mouse.GetPosition();
 
         //Update pitch yaw and roll
-        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x += static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime;
-        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y += static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime;
+        glm::vec3 threeDRotation = glm::vec3(static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime, static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime, 0);
+        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotate(threeDRotation);
         UnifiedEngine::NormalizeAngles(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation);
 
         //Resolution with scroll
@@ -112,6 +112,7 @@ int main(){
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
     gOBJ.transform.Position.z -= 5;
+    gOBJ.transform.SetRotation(glm::vec3(45, 0, 0));
     UnifiedEngine::instantiate(&gOBJ);
 
     // Lock the mouse
@@ -121,7 +122,7 @@ int main(){
     CameraControl Controller(&CamOBJ, &Cam);
 
     // Debug window enable
-    if(true){
+    if(false){
         UnifiedEngine::WindowConfig DbgWinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Debugger", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
         DbgWinConf.backgroundColor = {0, 0, 0};
 
@@ -136,7 +137,6 @@ int main(){
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Update()){
             FAULT("GAME_INSTANCE::FAILED TO UPDATE!");
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
-            exit(10);
         }
 
         if(UnifiedEngine::InputPointer->Keyboard.KeyPressed(UnifiedEngine::Key_ESCAPE)){
@@ -148,6 +148,7 @@ int main(){
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(11);
         }
+        gOBJ.transform.Rotate(glm::vec3(90 * UnifiedEngine::Time.DeltaTime, 0, 0));
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
