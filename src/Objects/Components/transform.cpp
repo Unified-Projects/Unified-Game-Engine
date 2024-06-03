@@ -55,6 +55,19 @@ namespace UnifiedEngine
             CalculateNewDirectionVectors();
         }
     }
+    /// @brief Rotates the object by the given step size so that it would rotate towards the given position
+    /// @param position The position to look at
+    /// @param stepsize The percentage of the rotation that should be completed on this step
+    void Transform::Lerp(glm::vec3 position, float stepsize) {
+        glm::vec3 relativevec = position - this->Position;
+        glm::vec3 axis = glm::cross(this->front, relativevec);
+        Normalize3DVector(axis);
+        float angle = glm::degrees(std::acos(glm::dot(this->front, relativevec) / (GetMagnitude(this->front) * GetMagnitude(relativevec)))) * stepsize;
+        if (angle != 0 && angle == angle) {
+            Transform::Rotate(GetQuaternionFromPolar(angle, axis));
+            CalculateNewDirectionVectors();
+        }
+    }
     /// @brief Updates the new direction vectors
     void Transform::CalculateNewDirectionVectors() {
         this->front = this->Quaternion * glm::vec3(0, 0, 1);

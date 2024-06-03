@@ -148,7 +148,7 @@ int main(){
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(11);
         }
-        gOBJ.transform.LookAt(Cam.transform.Position);
+        gOBJ.transform.Lerp(Cam.transform.Position, 1 * UnifiedEngine::Time.DeltaTime);
         //LOG(std::to_string(Cam.transform.Rotation.x) + ", " + std::to_string(Cam.transform.Rotation.y) + ", " + std::to_string(Cam.transform.Rotation.z));
     }
 

@@ -25,6 +25,7 @@ namespace UnifiedEngine
         void Rotate(glm::quat rotation);
         void Rotate(glm::vec3 rotation);
         void LookAt(glm::vec3 position);
+        void Lerp(glm::vec3 position, float stepsize);
         void CalculateNewDirectionVectors();
     };
 } // namespace UnifiedEngine
