@@ -69,6 +69,15 @@ namespace UnifiedEngine
             CalculateNewDirectionVectors();
         }
     }
+    /// @brief Moves the transform using the direction vectors
+    /// @param movement How much of the right, up and front vectors the object will be moved by
+    void Transform::Move(glm::vec3 movement) {
+        glm::vec3 movementvec;
+        movementvec += movement.x * this->right;
+        movementvec += movement.y * this->up;
+        movementvec += movement.z * this->front;
+        this->Position += movementvec;
+    }
     /// @brief Updates the new direction vectors
     void Transform::CalculateNewDirectionVectors() {
         this->front = this->Quaternion * glm::vec3(0, 0, 1);

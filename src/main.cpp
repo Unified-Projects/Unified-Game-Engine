@@ -149,7 +149,8 @@ int main(){
             exit(11);
         }
         gOBJ.transform.Lerp(Cam.transform.Position, 1 * UnifiedEngine::Time.DeltaTime);
-        //LOG(std::to_string(Cam.transform.Rotation.x) + ", " + std::to_string(Cam.transform.Rotation.y) + ", " + std::to_string(Cam.transform.Rotation.z));
+        gOBJ.transform.Move(glm::vec3(0, 0, 1 * UnifiedEngine::Time.DeltaTime));
+        LOG(std::to_string(gOBJ.transform.Position.x) + ", " + std::to_string(gOBJ.transform.Position.y) + ", " + std::to_string(gOBJ.transform.Position.z));
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
