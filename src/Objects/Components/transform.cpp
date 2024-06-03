@@ -5,9 +5,10 @@
 namespace UnifiedEngine
 {
     /// @brief Sets the rotation using a quaternion
-    /// @param rotation
+    /// @param rotation A quaternion
     void Transform::SetRotation(glm::quat rotation) {
         this->Quaternion = rotation;
+        NormalizeQuaternion(this->Quaternion);
         this->Rotation = glm::eulerAngles(this->Quaternion);
         this->Rotation.x = glm::degrees(this->Rotation.x);
         this->Rotation.y = glm::degrees(this->Rotation.y);
@@ -15,7 +16,7 @@ namespace UnifiedEngine
         CalculateNewDirectionVectors();
     }
     /// @brief Rotates the transform using euler angles
-    /// @param rotation
+    /// @param rotation Euler angles in degrees
     void Transform::SetRotation(glm::vec3 rotation) {
         this->Rotation = rotation;
         NormalizeAngles(this->Rotation);
@@ -23,7 +24,7 @@ namespace UnifiedEngine
         CalculateNewDirectionVectors();
     }
     /// @brief Rotates the transform using a quaternion
-    /// @param rotation
+    /// @param rotation A quaternion
     void Transform::Rotate(glm::quat rotation) {
         NormalizeQuaternion(rotation);
         this->Quaternion = rotation * this->Quaternion; //* glm::inverse(rotation);
@@ -35,7 +36,7 @@ namespace UnifiedEngine
         CalculateNewDirectionVectors();
     }
     /// @brief Rotates the transform using euler angles
-    /// @param rotation a glm::vec3 made of euler angles in degrees
+    /// @param rotation A vector made of euler angles in degrees
     void Transform::Rotate(glm::vec3 rotation) {
         this->Rotation += rotation;
         NormalizeAngles(this->Rotation);

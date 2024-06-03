@@ -21,12 +21,10 @@ namespace UnifiedEngine
         glm::mat4 ViewMatrix;
         glm::mat4 ProjectionMatrix;
 
-        Transform transform = {};
-
         //Perspective Matrix
 		float FOV;
-		float FarPlane;
-		float NearPlane;
+		float FarPlane; //!< The far clipping plane
+		float NearPlane; //!< The near clipping plane
 
 		//Angles
 		glm::vec3 ViewFront;

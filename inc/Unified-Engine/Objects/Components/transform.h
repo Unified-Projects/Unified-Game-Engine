@@ -13,13 +13,13 @@ namespace UnifiedEngine
 {
     /// @brief Stores Position, Rotation (in both euler and quaternions) and scale
     struct Transform{
-        glm::vec3 Position = glm::vec3(0.f);
-		glm::vec3 Rotation = glm::vec3(0.f);
-		glm::vec3 Scale = glm::vec3(1.f);
-        glm::quat Quaternion = glm::quat(1.f, 0.f, 0.f, 0.f);
-        glm::vec3 up;
-		glm::vec3 front;
-		glm::vec3 right;
+        glm::vec3 Position = glm::vec3(0.f); //!< Stores the position of the current transform
+		glm::vec3 Rotation = glm::vec3(0.f); //!< Stores the rotation, in euler angles, of the current transform
+		glm::vec3 Scale = glm::vec3(1.f); //!< Stores the scale of the current transform
+        glm::quat Quaternion = glm::quat(1.f, 0.f, 0.f, 0.f); //!< Stores the Quaternions of the current transform
+        glm::vec3 up; //!< Stores the up vector of the current transform
+		glm::vec3 front; //!< Stores the front vector of the current transform
+		glm::vec3 right;  //!< Stores the right vector of the current transform
         void SetRotation(glm::quat rotation);
         void SetRotation(glm::vec3 rotation);
         void Rotate(glm::quat rotation);

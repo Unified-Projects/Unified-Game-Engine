@@ -214,19 +214,6 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     // Multipyer
                     glm::vec3 RotationMultiplyer = glm::vec3(-1, 1, -1);
 
-                    // Camera Fixups for X and Z axis
-                    // LOG(parent->transformOld.Rotation.x, " ", parent->transformOld.Rotation.y, " ", parent->transformOld.Rotation.z);
-                    // LOG(parent->ViewRight.x, " ", parent->ViewRight.y, " ", parent->ViewRight.z);
-                    // LOG(parent->front.x, " ", parent->front.y, " ", parent->front.z);
-                    // LOG("END");
-
-                    // LOG("ADJUSTED: ", AdjustedNew.x, " ", AdjustedNew.y, " ", AdjustedNew.z);
-                    // LOG("ViewFront: ", ViewFront.x, " ", ViewFront.y, " ", ViewFront.z);
-
-                    // Calculate the rotation matrix
-                    // glm::mat4 RotationMatrix = CalculationCameraOriginRotation(parent->transform, parent->transformOld, child->transform, true, parent->ViewFront, &parent->OldAdjustedRotation);
-                    // glm::mat4 RotationMatrix = CalculationCameraOriginRotation(parent->transform, parent->transformOld, child->transform, parent);
-
                     // Calculate parent's movement
                     glm::vec3 parentMovement = parent->transform.Position - parent->transformOld.Position;
                     // glm::vec3 Rotation = (parent->AdjustedRotation - parent->OldAdjustedRotation);

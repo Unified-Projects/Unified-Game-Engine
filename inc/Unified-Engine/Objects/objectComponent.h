@@ -24,7 +24,7 @@ namespace UnifiedEngine
         ObjectComponent* Parent = nullptr;
         std::list<ObjectComponent*> Children = {};
         std::list<ObjectComponent*> Components = {};
-        Transform transform = {};
+        Transform transform = {}; //!< A transform that stores geometric details of the current object
         bool Enabled = true;
     public:
         const ObjectComponentType type;
