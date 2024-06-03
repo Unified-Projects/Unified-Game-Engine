@@ -8,6 +8,7 @@
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
 #include <GLM/mat4x4.hpp>
+#include <GLM/geometric.hpp>
 // #include <glm/gtc/quaternion.hpp>
 // #include <glm/gtx/quaternion.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
@@ -21,6 +22,7 @@ using namespace UnifiedEngine;
 ObjectComponent::ObjectComponent(ObjectComponent* _Parent, ObjectComponentType Type, bool Component)
     : type(Type)
 {
+    this->worldUp = glm::vec3(0, 1, 0);
     //Required to for all components (Even GameObjects, but may be set to null for game references)
     this->Parent = _Parent;
 
@@ -39,12 +41,6 @@ ObjectComponent::~ObjectComponent(){
 }
 
 int ObjectComponent::Update(){
-
-    this->front = normalize(this->front);
-
-    this->front.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
-    this->front.y = this->front.y;
-    this->front.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
 
     //Children
     this->UpdateC();
@@ -163,8 +159,6 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
 }
 
 glm::mat4 CalculationCameraOriginRotation(Transform transform, Transform childTransform, Camera* cam) {
-
-    glm::vec3 Rotation = (cam->AdjustedRotation - cam->OldAdjustedRotation);
 
     // Initialize the Matrix
     glm::mat4 Matrix(1.f);

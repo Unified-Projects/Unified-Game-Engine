@@ -31,10 +31,6 @@ namespace UnifiedEngine
 		//Angles
 		glm::vec3 ViewFront;
 
-		glm::vec3 up;
-		glm::vec3 front;
-		glm::vec3 right;
-
     public:
         Camera();
         ~Camera();

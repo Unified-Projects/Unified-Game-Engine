@@ -35,10 +35,6 @@ Camera::Camera()
 
     this->worldUp = glm::vec3(0, 1, 0);
 
-    this->up = this->worldUp;
-    this->front = glm::vec3(0);
-    this->right = glm::vec3(0);
-
     this->ViewFront = glm::vec3(0.f);
     this->ViewRight = glm::vec3(0.f);
     this->ViewUp = glm::vec3(0.f);
@@ -53,6 +49,8 @@ Camera::~Camera(){
 
 int Camera::Update(){
 
+
+    this->transform.CalculateNewDirectionVectors();
     //Game Type
     if (/*Game2D*/ 1 == 0) {
         //Calculate Solid
@@ -62,25 +60,16 @@ int Camera::Update(){
     }
     else {
         //Calculate Dynamic
-        this->ViewFront.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
-        this->ViewFront.y = sin(glm::radians(this->transform.Rotation.x));
-        this->ViewFront.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
+        //this->ViewFront.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
+        //this->ViewFront.y = sin(glm::radians(this->transform.Rotation.x));
+        //this->ViewFront.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
+        this->ViewFront = this->transform.front;
     }
 
-    //Assigning
-    this->ViewFront = normalize(this->ViewFront);
+    this->ViewRight = this->transform.right;
+    this->ViewUp = this->transform.up;
 
-    this->ViewRight = normalize(cross(this->ViewFront, this->worldUp));
-    this->ViewUp = normalize(cross(this->ViewRight, this->ViewFront));
 
-    this->front.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
-    this->front.y = this->front.y;
-    this->front.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
-
-    this->front = normalize(this->front);
-
-    this->right = normalize(cross(this->front, this->worldUp));
-    this->up = normalize(cross(this->right, this->front));
 
     //Matrixes
     this->ViewMatrix = glm::mat4(1.f);

@@ -19,15 +19,12 @@ namespace UnifiedEngine
 
     class ObjectComponent{
     protected:
+		glm::vec3 worldUp;
     public:
         ObjectComponent* Parent = nullptr;
         std::list<ObjectComponent*> Children = {};
         std::list<ObjectComponent*> Components = {};
         Transform transform = {};
-
-        glm::vec3 up;
-		glm::vec3 front;
-		glm::vec3 right;
         bool Enabled = true;
     public:
         const ObjectComponentType type;

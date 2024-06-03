@@ -25,7 +25,7 @@ namespace UnifiedEngine
         bool resizable = false;
         bool fullScreen = false;
         bool vsync = false;
-        int fps = -1;
+        int fps = 5;
         Color backgroundColor = {0.0f, 0.0f, 0.0f, 0.0f};
         GLFWmonitor* monitor = NULL;
         
