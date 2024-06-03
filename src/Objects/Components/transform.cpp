@@ -59,7 +59,7 @@ namespace UnifiedEngine
     /// @brief Rotates the object by the given step size so that it would rotate towards the given position
     /// @param position The position to look at
     /// @param stepsize The percentage of the rotation that should be completed on this step
-    void Transform::Lerp(glm::vec3 position, float stepsize) {
+    void Transform::SLerp(glm::vec3 position, float stepsize) {
         glm::vec3 relativevec = position - this->Position;
         glm::vec3 axis = glm::cross(this->front, relativevec);
         Normalize3DVector(axis);
