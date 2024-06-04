@@ -101,7 +101,7 @@ glm::mat4 CalculateModelMatrix(Transform transform, glm::vec3 origin){
     //Translations
     // Matrix = translate(Matrix, transform.Position);
     Matrix = glm::translate(Matrix, origin);
-    auto quaternionRotation = glm::mat4_cast(transform.Quaternion);
+    auto quaternionRotation = glm::mat4_cast(transform.Quaternion());
     Matrix = Matrix * quaternionRotation;
     Matrix = glm::translate(Matrix, transform.Position - origin);
     Matrix = glm::scale(Matrix, transform.Scale);

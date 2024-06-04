@@ -29,7 +29,7 @@ Camera::Camera()
     this->NearPlane = 0.01f;
 
     this->transform.Position = glm::vec3(0, 0, 0);
-    this->transform.Rotation = glm::vec3(0, -90, 0);
+    this->transform.SetRotation(glm::vec3(0, -90, 0));
 
     this->transformOld = this->transform;
 
@@ -48,9 +48,6 @@ Camera::~Camera(){
 
 
 int Camera::Update(){
-
-
-    this->transform.CalculateNewDirectionVectors();
     //Game Type
     if (/*Game2D*/ 1 == 0) {
         //Calculate Solid
@@ -63,11 +60,11 @@ int Camera::Update(){
         //this->ViewFront.x = cos(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
         //this->ViewFront.y = sin(glm::radians(this->transform.Rotation.x));
         //this->ViewFront.z = sin(glm::radians(this->transform.Rotation.y)) * cos(glm::radians(this->transform.Rotation.x));
-        this->ViewFront = this->transform.front;
+        this->ViewFront = this->transform.front();
     }
 
-    this->ViewRight = this->transform.right;
-    this->ViewUp = this->transform.up;
+    this->ViewRight = this->transform.right();
+    this->ViewUp = this->transform.up();
 
 
 
@@ -80,7 +77,7 @@ int Camera::Update(){
         // Calculate yaw (rotation around y-axis)
         float yaw = atan2(ViewFront.z, ViewFront.x);
 
-        float pitch = glm::radians(this->transform.Rotation.x); // Original rotation around X-axis
+        float pitch = glm::radians(this->transform.Rotation().x); // Original rotation around X-axis
 
         // Calculate ratio based on the view direction
         float total = glm::abs(ViewFront.x) + glm::abs(ViewFront.z);
