@@ -111,8 +111,8 @@ int main(){
 
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
-    gOBJ.transform.Position.z -= 5;
-    gOBJ.transform.SetRotation(glm::vec3(45, 0, 0));
+    gOBJ.transform.Position.x -= 5;
+    gOBJ.transform.SetRotation(glm::vec3(0, 0, 0));
     UnifiedEngine::instantiate(&gOBJ);
 
     // Lock the mouse
@@ -149,8 +149,7 @@ int main(){
             exit(11);
         }
         gOBJ.transform.SLerp(Cam.transform.Position, 1 * UnifiedEngine::Time.DeltaTime);
-        gOBJ.transform.Move(glm::vec3(0, 0, 1 * UnifiedEngine::Time.DeltaTime));
-        LOG(std::to_string(gOBJ.transform.Position.x) + ", " + std::to_string(gOBJ.transform.Position.y) + ", " + std::to_string(gOBJ.transform.Position.z));
+        gOBJ.transform.Move(glm::vec3(5 * UnifiedEngine::Time.DeltaTime, 0, 3 * UnifiedEngine::Time.DeltaTime));
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
