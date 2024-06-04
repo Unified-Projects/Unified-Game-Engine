@@ -50,7 +50,6 @@ public:
         //Update pitch yaw and roll
         glm::vec3 threeDRotation = glm::vec3(-static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime, -static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime, 0);
         UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotate(threeDRotation);
-        UnifiedEngine::NormalizeAngles(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation());
 
         //Resolution with scroll
         UnifiedEngine::WindowConfig conf = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->__windows.front()->Config();
