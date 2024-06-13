@@ -135,6 +135,7 @@ int main(){
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Update()){
             FAULT("GAME_INSTANCE::FAILED TO UPDATE!");
+            exit(10);
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
         }
 
