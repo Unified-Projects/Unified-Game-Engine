@@ -76,7 +76,7 @@ if(MSVC)
 else()
     message(STATUS "Using non-MSVC compiler")
     # Set flags for other compilers
-    target_compile_options(Main PRIVATE "-O3 -std=c++20 -fpermissive")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++20 -fpermissive")
 endif()
 
 # Find the OpenGL library depening on compiler

@@ -99,11 +99,11 @@ int ShaderObject::PassArgs(){
 
     //GameObject
     SendArg(this->shader, {.dataLoc=&(ParentObj->transform.Position), .type=SHADER_ARG_VEC3, .name="ObjectPosition"});
-    SendArg(this->shader, {.dataLoc=&(ParentObj->transform.Rotation), .type=SHADER_ARG_VEC3, .name="ObjectRotation"});
+    SendArg(this->shader, {.dataLoc=&(ParentObj->transform.Rotation()), .type=SHADER_ARG_VEC3, .name="ObjectRotation"});
 
     //Camera
     SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Position), .type=SHADER_ARG_VEC3, .name="CameraPosition"});
-    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation), .type=SHADER_ARG_VEC3, .name="CameraRotation"});
+    SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation()), .type=SHADER_ARG_VEC3, .name="CameraRotation"});
     SendArg(this->shader, {.dataLoc=&(__GAME__GLOBAL__INSTANCE__->GetMainCamera()->ViewFront), .type=SHADER_ARG_VEC3, .name="CameraFront"});
 
     return 0;
