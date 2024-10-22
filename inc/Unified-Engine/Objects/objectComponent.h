@@ -1,6 +1,8 @@
 #pragma once
 
 #include <list>
+#include <Unified-Engine/Objects/Components/transform.h>
+#include <GLM/vec3.hpp>
 
 namespace UnifiedEngine
 {
@@ -17,11 +19,12 @@ namespace UnifiedEngine
 
     class ObjectComponent{
     protected:
+		glm::vec3 worldUp;
     public:
         ObjectComponent* Parent = nullptr;
         std::list<ObjectComponent*> Children = {};
         std::list<ObjectComponent*> Components = {};
-
+        Transform transform = {}; //!< A transform that stores geometric details of the current object
         bool Enabled = true;
     public:
         const ObjectComponentType type;

@@ -18,6 +18,9 @@ namespace UnifiedEngine
 		GLuint VBO = 0;
 		GLuint EBO = 0;
 
+        
+        Transform transformOld = {};
+
         //To be updated through functions to prevent memory leaks with updating VAO
         Mesh mesh = {};
 
@@ -27,11 +30,9 @@ namespace UnifiedEngine
         int GenerateVAOBuffers();
 
         bool NoShader = true;
-        Transform transformOld = {};
         
     public:
         //Game Object Specifics
-        Transform transform = {};
 
         std::string Name = "";
         std::string Tag = "";

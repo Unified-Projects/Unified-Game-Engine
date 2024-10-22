@@ -31,33 +31,25 @@ public:
     int Update(){
         //Player Movement
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_W))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->front * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.front() * UnifiedEngine::Time.DeltaTime;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_A))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->right * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.right() * UnifiedEngine::Time.DeltaTime;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_S))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->front * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.front() * UnifiedEngine::Time.DeltaTime;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_D))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->right * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.right() * UnifiedEngine::Time.DeltaTime;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_SPACE))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->up * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.up() * UnifiedEngine::Time.DeltaTime;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_LEFT_SHIFT))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->up * UnifiedEngine::Time.DeltaTime;
+            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.up() * UnifiedEngine::Time.DeltaTime;
         
 
         //Player Rotation
         glm::vec2 mPos = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Mouse.GetPosition();
 
         //Update pitch yaw and roll
-        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x += static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime;
-        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y += static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime;
-
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x > 89.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x = 89.f;
-        else if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x < -89.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.x = -89.f;
-
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y > 360.f || UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y < -360.f)
-            UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotation.y = 0.f;
+        glm::vec3 threeDRotation = glm::vec3(-static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime, -static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime, 0);
+        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotate(threeDRotation);
 
         //Resolution with scroll
         UnifiedEngine::WindowConfig conf = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->__windows.front()->Config();
@@ -118,7 +110,8 @@ int main(){
 
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
-    gOBJ.transform.Position.z -= 5;
+    gOBJ.transform.Position.x -= 5;
+    gOBJ.transform.SetRotation(glm::vec3(0, 0, 0));
     UnifiedEngine::instantiate(&gOBJ);
 
     // Lock the mouse
@@ -128,7 +121,7 @@ int main(){
     CameraControl Controller(&CamOBJ, &Cam);
 
     // Debug window enable
-    if(true){
+    if(false){
         UnifiedEngine::WindowConfig DbgWinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Debugger", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
         DbgWinConf.backgroundColor = {0, 0, 0};
 
@@ -142,8 +135,8 @@ int main(){
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Update()){
             FAULT("GAME_INSTANCE::FAILED TO UPDATE!");
-            //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(10);
+            //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
         }
 
         if(UnifiedEngine::InputPointer->Keyboard.KeyPressed(UnifiedEngine::Key_ESCAPE)){
@@ -155,6 +148,8 @@ int main(){
             //TODO: Call some sort of deinitializer (UnifiedEngine::Terminate())
             exit(11);
         }
+        gOBJ.transform.SLerp(Cam.transform.Position, 1 * UnifiedEngine::Time.DeltaTime);
+        gOBJ.transform.Move(glm::vec3(5 * UnifiedEngine::Time.DeltaTime, 0, 3 * UnifiedEngine::Time.DeltaTime));
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.

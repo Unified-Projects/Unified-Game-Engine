@@ -8,6 +8,7 @@
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
 #include <GLM/mat4x4.hpp>
+#include <GLM/geometric.hpp>
 // #include <glm/gtc/quaternion.hpp>
 // #include <glm/gtx/quaternion.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
@@ -21,6 +22,7 @@ using namespace UnifiedEngine;
 ObjectComponent::ObjectComponent(ObjectComponent* _Parent, ObjectComponentType Type, bool Component)
     : type(Type)
 {
+    this->worldUp = glm::vec3(0, 1, 0);
     //Required to for all components (Even GameObjects, but may be set to null for game references)
     this->Parent = _Parent;
 
@@ -54,19 +56,16 @@ int ObjectComponent::Render(){
     return 0;
 }
 
-glm::mat4 CalculationOriginRotation(Transform newT, Transform oldT, Transform ChildT, glm::vec3 RotationMultiplyer = glm::vec3(-1, -1, -1)){
+glm::mat4 CalculationOriginRotation(Transform transform, Transform childTranform, glm::vec3 RotationMultiplyer = glm::vec3(-1, -1, -1)){
     //Intialiser
     glm::mat4 Matrix(1.f);
-
-    glm::vec3 Rotation = (newT.Rotation - oldT.Rotation);
-    glm::vec3 Origin = newT.Position;
+    glm::vec3 Origin = transform.Position;
 
     //Translations
-    Matrix = glm::translate(Matrix, Origin - ChildT.Position); // Child -> Origin
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
-    Matrix = glm::translate(Matrix, ChildT.Position - Origin); // Origin -> Chid
+    Matrix = glm::translate(Matrix, Origin - childTranform.Position); // Child -> Origin
+    auto quaternionRotation = glm::mat4_cast(transform.Quaternion());
+    Matrix = Matrix * quaternionRotation;
+    Matrix = glm::translate(Matrix, childTranform.Position - Origin); // Origin -> Chid
 
     //Return
     return Matrix;
@@ -78,7 +77,7 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     //Intialiser
     glm::mat4 Matrix(1.f);
 
-    glm::vec3 Rotation = (newT.Rotation - oldT.Rotation); //  - oldT.Rotation
+    glm::vec3 Rotation = (newT.Rotation() - oldT.Rotation()); //  - oldT.Rotation
     glm::vec3 Origin = newT.Position;
 
     // Convert the View Forward Normalised Values into 3 different angles (We know one already)
@@ -87,51 +86,6 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     // Y axis (Easy)
     Adjusted.y = Rotation.y;
 
-    // X and Z (Hard <= 89 degrees)
-        // Z
-        // float MultiplyerZ = (abs(FrontNew.x) + abs(FrontNew.z)) + (abs(FrontOld.x) + abs(FrontOld.z));
-        // MultiplyerZ /= 2;
-        // MultiplyerZ = ((abs(FrontNew.z) + abs(FrontOld.z)) / 2)/MultiplyerZ;
-
-        // Adjusted.z = Rotation.x * MultiplyerZ;
-
-        // // // X
-        // float MultiplyerX = (abs(FrontNew.x) + abs(FrontNew.z)) + (abs(FrontOld.x) + abs(FrontOld.z));
-        // MultiplyerX /= 2;
-        // MultiplyerX = ((abs(FrontNew.x) + abs(FrontOld.x)) / 2)/MultiplyerX;
-
-        // Adjusted.x = Rotation.x * MultiplyerX;
-
-        /*float MultiplyerZ = (FrontNew.z)/((FrontNew.x) + (FrontNew.z));
-        Adjusted.x = Rotation.x * MultiplyerZ;
-
-        // // X
-        float MultiplyerX = (FrontNew.x)/((FrontNew.x) + (FrontNew.z));
-        Adjusted.z = Rotation.x * MultiplyerX;
-
-        Adjusted.x = Rotation.x;
-        Adjusted.z = 0;*/     
-
-        // Using Trig
-        /*float X2 = FrontNew.x * FrontNew.x;
-        float Y2 = FrontNew.y * FrontNew.y;
-        float Z2 = FrontNew.z * FrontNew.z;
-      
-        Adjusted.x = glm::degrees(atan2(sqrt(Y2 + Z2), FrontNew.x));
-        Adjusted.y = glm::degrees(atan2(sqrt(Z2 + X2), FrontNew.y));
-        Adjusted.z = glm::degrees(atan2(sqrt(X2 + Y2), FrontNew.z));
-
-        float VMagnitude = sqrt(X2 + Y2 + Z2);
-
-        Adjusted.x = glm::degrees(acos(FrontNew.x/VMagnitude)) - 90;
-        Adjusted.y = glm::degrees(acos(FrontNew.z/VMagnitude)) - 90;
-        Adjusted.z = glm::degrees(acos(FrontNew.y/VMagnitude)) - 90;*/       
-
-        // float MultiplyerX = ((FrontNew.y + FrontOld.y) / 2);
-        // float MultiplyerZ = 1 - ((FrontNew.y + FrontOld.y) / 2);
-
-        // Adjusted.x = Rotation.x * MultiplyerX;
-        // Adjusted.z = Rotation.x * MultiplyerZ;
 
     // New Method - Use Y purely
     
@@ -148,34 +102,10 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
         Rotation.y -= 360 * (Rotation.y >= 360);
     }
 
-    // Now map ratios
-        // 90 = x (Cos() = 0)
-        // 180 = -x (Sin() = 0)
-        
-        // 0 = z (Sin() = 0)
-        // 270 = -z (Cos() = 0)
-
-    // TODO REGIONS DO NOT CONFORM TO THE EXPECTED 90 DEGREES
-        // From what I can tell, the ranges are wrong
-        // However in the case of Axis alligned this is pretty close!
-
-        // This gives us 4 Quartiles of multipliers
-
-    // float MultiplyerZ = (abs(FrontNew.x) / (abs(FrontNew.x) + abs(FrontNew.z)));
-    // float MultiplyerX = (abs(FrontNew.z) / (abs(FrontNew.x) + abs(FrontNew.z)));
-
-    // Use of Trig
-        // Angle Between X and Z is Y
-        // Angle Between X and Y is Z 
-        // Angle Between Y and Z is X
-
     float X2 = FrontNew.x * FrontNew.x;
     float Y2 = FrontNew.y * FrontNew.y;
     float Z2 = FrontNew.z * FrontNew.z;
 
-    // Adjusted.x = glm::degrees(abs(atan(FrontNew.y/FrontNew.z)));
-    // Adjusted.y = glm::degrees(abs(atan(FrontNew.z/FrontNew.x)));
-    // Adjusted.z = glm::degrees(abs(atan(FrontNew.x/FrontNew.y)));
     Adjusted.x = glm::degrees((atan(FrontNew.x/sqrt(Y2 + Z2))));
     Adjusted.y = glm::degrees((atan(FrontNew.y/sqrt(X2 + Z2))));
     Adjusted.z = glm::degrees((atan(FrontNew.z/sqrt(X2 + Y2))));
@@ -183,22 +113,6 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     float MultiplyerX = Adjusted.x / (abs(Adjusted.x + Adjusted.z));
     float MultiplyerZ = Adjusted.z / (abs(Adjusted.x + Adjusted.z));
 
-    // if (Adjusted.y < 90){ // -X and -Z
-    //     RotationMultiplyer = glm::vec3(-1.f, 1.f, -1.f);
-    // }
-    // else if (Adjusted.y < 180){ // -x and +z 
-        // RotationMultiplyer = glm::vec3(-1.f, 1.f, 1.f);
-    // }
-    // else if (Adjusted.y < 270){ // +X and +Z
-    //     RotationMultiplyer = glm::vec3(1.f, 1.f, 1.f);
-    // }
-    // else{ // +X and -Z
-    //     RotationMultiplyer = glm::vec3(1.f, 1.f, -1.f);
-    // }
-
-    // if (Adjusted.y < 180){ // -x and +z 
-        // RotationMultiplyer = glm::vec3(-1.f, 1.f, 1.f);
-    // }
     
     Adjusted.x = Rotation.x * MultiplyerZ * -1;
     Adjusted.y = Rotation.y;
@@ -213,10 +127,9 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
         // Bufferer = 0;
 
         LOG("Front: ", FrontNew.x, " ", FrontNew.y, " ", FrontNew.z);
-        LOG("New: ", newT.Rotation.x, " ", newT.Rotation.y, " ", newT.Rotation.z);
+        LOG("New: ", newT.Rotation().x, " ", newT.Rotation().y, " ", newT.Rotation().z);
         LOG("Rotation: ", Rotation.x, " ", Rotation.y, " ", Rotation.z);
         LOG("Adjusted: ", Adjusted.x, " ", Adjusted.y, " ", Adjusted.z);
-        // LOG("Diff: ", Adjusted.x - PrevRotation[0].x, " ", Adjusted.y - PrevRotation[0].y, " ", Adjusted.z - PrevRotation[0].z);
     }
     else{
         Bufferer++;
@@ -230,19 +143,12 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     //Translations
     Matrix = glm::translate(Matrix, Origin - ChildT.Position); // Child -> Origin
     
-    // First undo last rotation
-    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].x), glm::vec3(-RotationMultiplyer.x, 0.f, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].y), glm::vec3(0.f, -RotationMultiplyer.y, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(PrevRotation[0].z), glm::vec3(0.f, 0.f, -RotationMultiplyer.z));
 
     // Then apply new
     Matrix = glm::rotate(Matrix, glm::radians(Adjusted.x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
     Matrix = glm::rotate(Matrix, glm::radians(Adjusted.y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
     Matrix = glm::rotate(Matrix, glm::radians(Adjusted.z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
 
-    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.x-PrevRotation[0].x), glm::vec3(RotationMultiplyer.x, 0.f, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.y-PrevRotation[0].y), glm::vec3(0.f, RotationMultiplyer.y, 0.f));
-    // Matrix = glm::rotate(Matrix, glm::radians(Adjusted.z-PrevRotation[0].z), glm::vec3(0.f, 0.f, RotationMultiplyer.z));
 
     Matrix = glm::translate(Matrix, ChildT.Position - Origin); // Origin -> Chid
 
@@ -252,42 +158,16 @@ glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transf
     return Matrix;
 }
 
-glm::mat4 CalculationCameraOriginRotation(Transform newT, Transform oldT, Transform childT, Camera* cam) {
-    // glm::vec3 Rotation = (cam->AdjustedRotation - cam->OldAdjustedRotation); // Rotation Difference
-
-    // LOG("CAM_ROATTION", glm::to_string(Rotation));
-    // LOG("CAM_ADJUSTED_ROATTION", glm::to_string(cam->AdjustedRotation));
-
-    // // Convert Euler Angles to Quaternion
-    // glm::quat q = glm::quat(Rotation);
-
-    // // Convert Quaternion to Rotation Matrix
-    // glm::mat4 rotationMatrix = glm::toMat4(q);
-
-    // // Translate the child position to the origin of the parent (camera)
-    // glm::vec3 relativePos = childT.Position - newT.Position;
-
-    // // Rotate the relative position
-    // glm::vec3 rotatedPos = glm::vec3(rotationMatrix * glm::vec4(relativePos, 1.0f));
-
-    // // Translate the position back
-    // childT.Position = rotatedPos + newT.Position;
-
-    glm::vec3 Rotation = (cam->AdjustedRotation - cam->OldAdjustedRotation);
-    // glm::vec3 Position = ()
+glm::mat4 CalculationCameraOriginRotation(Transform transform, Transform childTransform, Camera* cam) {
 
     // Initialize the Matrix
     glm::mat4 Matrix(1.f);
 
-    // Relative position of child to the parent
-    glm::vec3 relativePos = childT.Position - newT.Position;
-
     // Translate to parent's position (parent's position), rotate, then translate back
-    Matrix = glm::translate(Matrix, -newT.Position);
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(1.f, 0.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, 1.f, 0.f));
-    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(0.f, 0.f, 1.f));
-    Matrix = glm::translate(Matrix, newT.Position);
+    Matrix = glm::translate(Matrix, -transform.Position);
+    auto quaternionRotation = glm::mat4_cast(transform.Quaternion());
+    Matrix = Matrix * quaternionRotation;
+    Matrix = glm::translate(Matrix, transform.Position);
 
     //Return
     return Matrix;
@@ -313,14 +193,14 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     child->transform.Position += parent->transform.Position - parent->transformOld.Position;
 
                     // Calculate the rotation matrix
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);
 
                     // Apply rotation
-                    glm::vec3 Rotation = (parent->transform.Rotation - parent->transformOld.Rotation); // Rotation Difference
-                    child->transform.Rotation += Rotation;
+                    glm::vec3 Rotation = (parent->transform.Rotation() - parent->transformOld.Rotation()); // Rotation Difference
+                    child->transform.Rotate(Rotation);
 
                     return 0;
                 }
@@ -333,19 +213,6 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     
                     // Multipyer
                     glm::vec3 RotationMultiplyer = glm::vec3(-1, 1, -1);
-
-                    // Camera Fixups for X and Z axis
-                    // LOG(parent->transformOld.Rotation.x, " ", parent->transformOld.Rotation.y, " ", parent->transformOld.Rotation.z);
-                    // LOG(parent->ViewRight.x, " ", parent->ViewRight.y, " ", parent->ViewRight.z);
-                    // LOG(parent->front.x, " ", parent->front.y, " ", parent->front.z);
-                    // LOG("END");
-
-                    // LOG("ADJUSTED: ", AdjustedNew.x, " ", AdjustedNew.y, " ", AdjustedNew.z);
-                    // LOG("ViewFront: ", ViewFront.x, " ", ViewFront.y, " ", ViewFront.z);
-
-                    // Calculate the rotation matrix
-                    // glm::mat4 RotationMatrix = CalculationCameraOriginRotation(parent->transform, parent->transformOld, child->transform, true, parent->ViewFront, &parent->OldAdjustedRotation);
-                    // glm::mat4 RotationMatrix = CalculationCameraOriginRotation(parent->transform, parent->transformOld, child->transform, parent);
 
                     // Calculate parent's movement
                     glm::vec3 parentMovement = parent->transform.Position - parent->transformOld.Position;
@@ -363,9 +230,8 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Translate to parent's position, rotate, then translate back
                     Matrix = glm::translate(Matrix, -relativePos);
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.x), glm::vec3(0.f, 0.f, 1.f));
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.y), glm::vec3(0.f, 1.f, 0.f));
-                    Matrix = glm::rotate(Matrix, glm::radians(Rotation.z), glm::vec3(1.f, 0.f, 0.f));
+                    auto quaternionRotation = glm::mat4_cast(parent->transform.Quaternion());
+                    Matrix = Matrix * quaternionRotation;
                     Matrix = glm::translate(Matrix, relativePos);
 
                     // Use Matrix to get the new position of the child
@@ -393,7 +259,7 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Apply rotation
                     // glm::vec3 Rotation = (parent->transform.Rotation - parent->transformOld.Rotation); // Rotation Difference
-                    child->transform.Rotation += Rotation;
+                    child->transform.Rotate(Rotation);
 
                     return 0;
                 }
@@ -415,14 +281,14 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
                     child->transform.Position += parent->transform.Position - parent->transformOld.Position;
 
                     // Calculate the rotation matrix
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);
 
                     // Apply rotation
-                    glm::vec3 Rotation = (parent->transform.Rotation - parent->transformOld.Rotation); // Rotation Difference
-                    child->transform.Rotation += Rotation; // TODO: No workie?
+                    glm::vec3 Rotation = (parent->transform.Rotation() - parent->transformOld.Rotation()); // Rotation Difference
+                    child->transform.Rotate(Rotation); // TODO: No workie?
 
                     return 0;
                 }
@@ -435,14 +301,14 @@ int ObjectComponent::CalcFollow(ObjectComponent* obj){
 
                     // Calculate the rotation matrix
                     // 
-                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, parent->transformOld, child->transform);
+                    glm::mat4 RotationMatrix = CalculationOriginRotation(parent->transform, child->transform);
 
                     // Change position through matrix
                     child->transform.Position = glm::vec3(glm::vec4(child->transform.Position, 1) * RotationMatrix);
 
                     // Apply rotation
-                    glm::vec3 Rotation = (parent->transform.Rotation - parent->transformOld.Rotation); // Rotation Difference
-                    child->transform.Rotation += Rotation;
+                    glm::vec3 Rotation = (parent->transform.Rotation() - parent->transformOld.Rotation()); // Rotation Difference
+                    child->transform.Rotate(Rotation);
 
                     return 0;
                 }
