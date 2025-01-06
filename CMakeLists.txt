@@ -58,8 +58,8 @@ file(GLOB_RECURSE SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*)
 include_directories(${PROJECT_SOURCE_DIR}/inc/)
 
 # Define Library Target for External Usage
-# add_library(MainLib STATIC ${SRC})
-add_executable(MainLib ${SRC})
+add_library(MainLib STATIC ${SRC})
+# add_executable(MainLib ${SRC})
 
 # macOS Specific Setup
 if(APPLE)
