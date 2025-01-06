@@ -198,6 +198,17 @@ int TextureAtlas::Toggle(Texture2D* image){
     return 0;
 }
 
+Texture2D* TextureAtlas::CheckExists(std::string FilePath){
+    for (auto x : this->Texture2DIdentifiers){
+        for (auto y : x){
+            if (y.Texture->FilePath == FilePath){
+                return y.Texture;
+            }
+        }
+    }
+    return nullptr;
+}
+
 Texture2D::Texture2D(std::string FilePath)
     : UVsr(UVs), TextID(TextureID)
 {
@@ -245,6 +256,8 @@ Texture2D::~Texture2D(){
     }
 
     __GLOBAL_ATLAS->RemoveImage(this);
+
+    delete this->Data;
 }
 
 int Texture2D::UpdateTeture(std::string FilePath){
@@ -316,4 +329,11 @@ int Texture2D::Unbind(){
 //Allow conversion from atlas to a texture (Import to the global Atlas)
 void Texture2D::operator=(TextureAtlas* Atlas){
     FAULT("NOT IMPLEMENTED YET");
+}
+
+Texture2D* UnifiedEngine::LoadTexture(std::string FilePath){
+    if (Texture2D* texture = __GLOBAL_ATLAS->CheckExists(FilePath); texture){
+        return texture;
+    }
+    return new Texture2D(FilePath);
 }

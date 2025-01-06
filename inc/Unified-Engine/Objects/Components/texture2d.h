@@ -62,6 +62,8 @@ namespace UnifiedEngine
         int RemoveImage(Texture2D* image);
 
         int Toggle(Texture2D* image);
+
+        Texture2D* CheckExists(std::string FilePath);
     };
 
     //TODO: if no atlas return faults on attempts to load texture
@@ -98,5 +100,7 @@ namespace UnifiedEngine
         //Allow conversion from atlas to a texture (Import to the global Atlas)
         void operator=(TextureAtlas* Atlas);
     };
+
+    Texture2D* LoadTexture(std::string FilePath);
 
 } // namespace UnifiedEngine
