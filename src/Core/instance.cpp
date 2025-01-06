@@ -4,6 +4,9 @@
 #include <Unified-Engine/Core/time.h>
 #include <Unified-Engine/Objects/gameObject.h>
 
+#include <chrono>
+#include <thread>
+
 using namespace UnifiedEngine;
 
 namespace UnifiedEngine
@@ -63,6 +66,7 @@ namespace UnifiedEngine
 
         #ifdef __APPLE__
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+            glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
         #endif
     }
     GameInstance::~GameInstance(){
@@ -164,6 +168,13 @@ namespace UnifiedEngine
         // Window Context
         this->__windows.front()->Activate();
 
+        // Ensure V-Sync is set properly
+        if (this->__windows.front()->Config().vsync) {
+            glfwSwapInterval(1); // Enable V-Sync
+        } else {
+            glfwSwapInterval(0); // Disable V-Sync
+        }
+
         if(this->Framebuffer)
             glDeleteFramebuffers(1, &this->Framebuffer);
         if(this->Renderbuffer)
@@ -171,12 +182,19 @@ namespace UnifiedEngine
         if(this->Texture)
             glDeleteTextures(1, &this->Texture);
 
+        // See if we need to scale
+        bool Scaled = false;
+        if (this->__windows.front()->Config().res_x != this->__windows.front()->Config().x || this->__windows.front()->Config().res_y != this->__windows.front()->Config().y) {
+            Scaled = true;
+        }
+
+        // Ensure consistent viewport
+        glViewport(0, 0, this->__windows.front()->Config().res_x,  this->__windows.front()->Config().res_y);
+
         //
         // Resolution Stuff
         //
-        {
-            glViewport(0, 0, this->__windows.front()->Config().res_x,  this->__windows.front()->Config().res_y);
-
+        if (Scaled){
             glGenFramebuffers(1, &this->Framebuffer);
             glBindFramebuffer(GL_FRAMEBUFFER, this->Framebuffer);
         }
@@ -187,7 +205,7 @@ namespace UnifiedEngine
         //
         // Resolution Stuff
         //
-        {
+        if (Scaled){
             glGenTextures(1, &this->Texture);
             glBindTexture(GL_TEXTURE_2D, this->Texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->__windows.front()->Config().res_x, this->__windows.front()->Config().res_y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
@@ -203,7 +221,6 @@ namespace UnifiedEngine
         }
 
         // Render
-        // Clear the colorbuffer
         if(!this->skybox){
             glClearColor(this->__windows.front()->Config().backgroundColor.red, this->__windows.front()->Config().backgroundColor.green, this->__windows.front()->Config().backgroundColor.blue, this->__windows.front()->Config().backgroundColor.alpha);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -213,8 +230,8 @@ namespace UnifiedEngine
         else{
             this->skybox->Render();
         }
-        
-        //Draw Objects
+
+        // Draw Objects
         for (auto i = this->objects.begin(); i != this->objects.end(); i++) {
             (*i)->Render();
         }
@@ -222,54 +239,53 @@ namespace UnifiedEngine
         //
         // Resolution Stuff
         //
-        {
+        if (Scaled){
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
             OpenGLDisable(GL_DEPTH_TEST);
             OpenGLDisable(GL_CULL_FACE);
 
+            glViewport(0, 0, this->__windows.front()->Config().x,  this->__windows.front()->Config().y);
+
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);
-            glClear(GL_DEPTH_BUFFER_BIT); //If issues dissable me
+            glClear(GL_DEPTH_BUFFER_BIT); // If issues, disable
             // glClear(GL_STENCIL_BUFFER_BIT);
-
-            glViewport(0, 0, this->__windows.front()->Config().x,  this->__windows.front()->Config().y);
 
             glBlitFramebuffer(0, 0, this->__windows.front()->Config().res_x, this->__windows.front()->Config().res_y, 0, 0, this->__windows.front()->Config().x, this->__windows.front()->Config().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
         }
 
         // Swap the screen buffers
-        if (this->__windows.front()->Config().vsync) {
-            glfwSwapBuffers(this->__windows.front()->Context());
-        }
+        glfwSwapBuffers(this->__windows.front()->Context());
 
         // Render Debugger
         if(this->debugWindow){
             this->debugWindow->Render();
         }
 
-        //Incr Counter
+        // Increment Counter
         FrameCounter++;
 
-        //Delay next frame
+        // Delay next frame (simplified)
         if (!this->__windows.front()->Config().vsync && this->__windows.front()->Config().fps > 0 && this->LastTime > 0.f) {
-            while (Time.Time() < this->LastTime + 1.0 / this->__windows.front()->Config().fps) {
-                //Do Nothing
+            float targetTime = this->LastTime + 1.0f / this->__windows.front()->Config().fps;
+            while (Time.Time() < targetTime) {
+                std::this_thread::sleep_for(std::chrono::microseconds(100)); // Sleep briefly to avoid overloading the CPU
             }
         }
 
-        //Update for FPS
+        // Update for FPS
         this->LastTime = Time.Time();
 
-        // LOG(1 / Time.DeltaTime);
-
-        //Clean
+        // Clean
         glFlush();
         
         return 0;
     }
+
     
     int GameInstance::RecuseSearchChild(int Setting, bool multi, void* resultstore, std::list<ObjectComponent*>* StartingPoint, void* argument){
         if(!resultstore){

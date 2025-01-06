@@ -58,7 +58,8 @@ file(GLOB_RECURSE SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c*)
 include_directories(${PROJECT_SOURCE_DIR}/inc/)
 
 # Define Library Target for External Usage
-add_library(MainLib STATIC ${SRC})
+# add_library(MainLib STATIC ${SRC})
+add_executable(MainLib ${SRC})
 
 # macOS Specific Setup
 if(APPLE)
@@ -84,35 +85,3 @@ endif()
 add_dependencies(MainLib GLFW SOIL2 GLM FreeType2)
 target_include_directories(MainLib PUBLIC ${EXTERNAL_INSTALL_LOCATION}/include)
 target_link_libraries(MainLib freetype soil2 glfw3 ${OPENGL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-# Define Executable Target for Standalone Builds
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    add_executable(${PROJECT_NAME} ${SRC})
-
-    # macOS Specific Setup for Executable
-    if(APPLE)
-        target_link_libraries(${PROJECT_NAME}
-            "-framework Cocoa"
-            "-framework OpenGL"
-            "-framework IOKit"
-            "-framework CoreFoundation"
-            "-framework QuartzCore" # Required for CAMetalLayer
-        )
-    endif()
-
-    # Link Library to Executable
-    target_link_libraries(${PROJECT_NAME} MainLib)
-endif()
-
-install(TARGETS MainLib EXPORT GameEngineTargets
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h*")
-
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-    )
-endif()

@@ -83,12 +83,12 @@ public:
 
 int main(){
     UnifiedEngine::__GLOBAL_CONFIG__.VersionMajor = 4;
-    UnifiedEngine::__GLOBAL_CONFIG__.VersionMinor = 6;
+    UnifiedEngine::__GLOBAL_CONFIG__.VersionMinor = 1;
 
     UnifiedEngine::__INIT__ENGINE();
 
     // Window Setup
-    UnifiedEngine::WindowConfig WinConf = {.x = 1260, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Test Program", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
+    UnifiedEngine::WindowConfig WinConf = {.x = 1280, .y = 720, .res_x = 0, .res_y = 0, .title = (char*)"Test Program", .resizable = true, .fullScreen = false, .vsync = true, .fps = 60};
     WinConf.backgroundColor = {0, 0, 0};
 
     UnifiedEngine::Window GameWindow(WinConf);
