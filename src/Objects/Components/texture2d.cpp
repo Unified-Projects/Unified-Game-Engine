@@ -222,7 +222,7 @@ Texture2D::Texture2D(std::string FilePath)
     this->Data = SOIL_load_image(this->FilePath.c_str(), &this->width, &this->height, NULL, SOIL_LOAD_RGBA);
 
     if(!Data){
-        FAULT("COULD NOT AQUIRE DATA");
+        FAULT("COULD NOT AQUIRE DATA: ", this->FilePath.c_str());
         return;
     }
 
@@ -239,7 +239,7 @@ Texture2D::Texture2D(uint8_t* Data, int width, int height)
     }
 
     if(!Data){
-        FAULT("COULD NOT AQUIRE DATA");
+        FAULT("COULD NOT READ DATA");
         return;
     }
 
@@ -273,7 +273,7 @@ int Texture2D::UpdateTeture(std::string FilePath){
     this->Data = SOIL_load_image(this->FilePath.c_str(), &this->width, &this->height, NULL, SOIL_LOAD_RGBA);
 
     if(!Data){
-        FAULT("COULD NOT AQUIRE DATA");
+        FAULT("COULD NOT RE-READ DATA: ", this->FilePath.c_str());
         return -1;
     }
 
@@ -290,7 +290,7 @@ int Texture2D::UpdateTeture(uint8_t* Data, int width, int height){
     }
 
     if(!Data){
-        FAULT("COULD NOT AQUIRE DATA");
+        FAULT("COULD NOT UPDATE DATA");
         return -1;
     }
 
@@ -339,7 +339,6 @@ std::string GetFullPath(const std::string& filePath) {
         std::filesystem::path path = std::filesystem::absolute(filePath);
         return path.string(); // Return as a std::string
     } catch (const std::filesystem::filesystem_error& e) {
-        // Handle errors if the path is invalid
         std::cerr << "Error resolving full path: " << e.what() << std::endl;
         return ""; // Return an empty string on error
     }
@@ -349,5 +348,5 @@ Texture2D* UnifiedEngine::LoadTexture(std::string FilePath){
     if (Texture2D* texture = __GLOBAL_ATLAS->CheckExists(GetFullPath(FilePath)); texture){
         return texture;
     }
-    return new Texture2D(FilePath);
+    return new Texture2D(GetFullPath(FilePath));
 }
