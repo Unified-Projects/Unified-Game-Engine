@@ -331,8 +331,22 @@ void Texture2D::operator=(TextureAtlas* Atlas){
     FAULT("NOT IMPLEMENTED YET");
 }
 
+#include <filesystem>
+
+std::string GetFullPath(const std::string& filePath) {
+    try {
+        // Convert the given path to an absolute path
+        std::filesystem::path path = std::filesystem::absolute(filePath);
+        return path.string(); // Return as a std::string
+    } catch (const std::filesystem::filesystem_error& e) {
+        // Handle errors if the path is invalid
+        std::cerr << "Error resolving full path: " << e.what() << std::endl;
+        return ""; // Return an empty string on error
+    }
+}
+
 Texture2D* UnifiedEngine::LoadTexture(std::string FilePath){
-    if (Texture2D* texture = __GLOBAL_ATLAS->CheckExists(FilePath); texture){
+    if (Texture2D* texture = __GLOBAL_ATLAS->CheckExists(GetFullPath(FilePath)); texture){
         return texture;
     }
     return new Texture2D(FilePath);
