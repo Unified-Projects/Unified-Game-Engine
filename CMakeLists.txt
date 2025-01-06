@@ -104,21 +104,15 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     target_link_libraries(${PROJECT_NAME} MainLib)
 endif()
 
-# Install Targets
-install(TARGETS MainLib
+install(TARGETS MainLib EXPORT GameEngineTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )
+install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*.h*")
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
     )
 endif()
-
-# Install Headers
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/inc/
-    DESTINATION include
-    FILES_MATCHING PATTERN "*.h*"
-)
