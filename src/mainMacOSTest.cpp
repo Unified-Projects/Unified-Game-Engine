@@ -10,6 +10,9 @@
 #include <Unified-Engine/Objects/scriptObject.h>
 #include <Unified-Engine/Core/time.h>
 
+
+#include <Unified-Engine/Objects/Components/collider.h>
+
 class CameraControl : public UnifiedEngine::ScriptableObject{
 public:
     UnifiedEngine::GameObject* OBJ;
@@ -103,16 +106,29 @@ int main(){
     
     UnifiedEngine::Shader shader("../rsc/testVertex.glsl", "../rsc/testFragment.glsl");
     UnifiedEngine::ShaderObject shaderObj(&shader);
+    UnifiedEngine::ShaderObject shaderObj2(&shader);
 
     // Create the mesh using the standard cube
     UnifiedEngine::Mesh mesh;
     mesh = UnifiedEngine::Cube();
+
+    UnifiedEngine::MeshCollider Col1 = {};
+    Col1.mesh = &mesh;
+    Col1.Offset = glm::vec3(1, 1, 1);
+    UnifiedEngine::MeshCollider Col2 = {};
+    Col2.mesh = &mesh;
 
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
     gOBJ.transform.Position.x -= 5;
     gOBJ.transform.SetRotation(glm::vec3(0, 0, 0));
     UnifiedEngine::instantiate(&gOBJ);
+    
+    UnifiedEngine::GameObject gOBJ2(mesh, &shaderObj2);
+    gOBJ2.transform.Position = Col1.Offset;
+    gOBJ2.transform.Position.x -= 5;
+    gOBJ2.transform.SetRotation(glm::vec3(0, 0, 0));
+    UnifiedEngine::instantiate(&gOBJ2);
 
     UnifiedEngine::InputPointer->Mouse.Cursor.Locked();
 
@@ -132,6 +148,8 @@ int main(){
         if(UnifiedEngine::InputPointer->Keyboard.KeyPressed(UnifiedEngine::Key_ESCAPE)){
             break;
         }
+
+        LOG(Col1.intersects(&Col2));
 
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Render()){
             FAULT("GAME_INSTANCE::FAILED TO RENDER!");

@@ -17,6 +17,7 @@ namespace UnifiedEngine
 
     class Collider : public ObjectComponent{
     public: //CollisionChecks
+        Collider() : ObjectComponent(nullptr, OBJECT_COLLIDER, false) {}
 
     public:
         glm::vec3 Offset = glm::vec3(0.0f);
@@ -34,6 +35,10 @@ namespace UnifiedEngine
 
     class MeshCollider : public Collider{
     public:
-        Mesh mesh = {};
+        MeshCollider() {}
+
+        Mesh* mesh = nullptr;
+
+        bool intersects(MeshCollider* Other);
     };
 } // namespace UnifiedEngine
