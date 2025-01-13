@@ -2,16 +2,6 @@
 
 using namespace UnifiedEngine;
 
-AABB* computeAABB(const Mesh* mesh)
-{
-    AABB* box = new AABB{};
-    for (const auto& vertex : mesh->vertices)
-    {
-        box->expand(vertex.position);
-    }
-    return box;
-}
-
 // Check if a point is inside a triangle using barycentric coordinates
 bool isPointInTriangle(const glm::vec3& point, const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2, bool ccw)
 {
@@ -118,44 +108,44 @@ bool triangleIntersects(const glm::vec3& v0, const glm::vec3& v1, const glm::vec
     return false;
 }
 
-bool MeshCollider::intersects(MeshCollider* Other){
+// bool MeshCollider::intersects(MeshCollider* Other){
 
-    if(!this->mesh->GeneratedAABB){
-        this->mesh->GeneratedAABB = computeAABB(this->mesh);
-    }
-    if(!Other->mesh->GeneratedAABB){
-        Other->mesh->GeneratedAABB = computeAABB(Other->mesh);
-    }
+//     if(!this->mesh->GeneratedAABB){
+//         this->mesh->GeneratedAABB = computeAABB(this->mesh);
+//     }
+//     if(!Other->mesh->GeneratedAABB){
+//         Other->mesh->GeneratedAABB = computeAABB(Other->mesh);
+//     }
 
-    // Compute AABBs
-    AABB* box1 = this->mesh->GeneratedAABB;
-    AABB* box2 = Other->mesh->GeneratedAABB;
+//     // Compute AABBs
+//     AABB* box1 = this->mesh->GeneratedAABB;
+//     AABB* box2 = Other->mesh->GeneratedAABB;
 
-    // Quick rejection using AABB
-    if (!box1->intersects(box2))
-    {
-        return false;
-    }
+//     // Quick rejection using AABB
+//     if (!box1->intersects(box2))
+//     {
+//         return false;
+//     }
 
-    // Detailed triangle-triangle checks
-    for (size_t i = 0; i < this->mesh->indices.size(); i += 3)
-    {
-        glm::vec3 v0 = this->mesh->vertices[this->mesh->indices[i]].position + this->Offset;
-        glm::vec3 v1 = this->mesh->vertices[this->mesh->indices[i + 1]].position + this->Offset;
-        glm::vec3 v2 = this->mesh->vertices[this->mesh->indices[i + 2]].position + this->Offset;
+//     // Detailed triangle-triangle checks
+//     for (size_t i = 0; i < this->mesh->indices.size(); i += 3)
+//     {
+//         glm::vec3 v0 = this->mesh->vertices[this->mesh->indices[i]].position + this->Offset;
+//         glm::vec3 v1 = this->mesh->vertices[this->mesh->indices[i + 1]].position + this->Offset;
+//         glm::vec3 v2 = this->mesh->vertices[this->mesh->indices[i + 2]].position + this->Offset;
 
-        for (size_t j = 0; j < Other->mesh->indices.size(); j += 3)
-        {
-            glm::vec3 u0 = Other->mesh->vertices[Other->mesh->indices[j]].position + Other->Offset;
-            glm::vec3 u1 = Other->mesh->vertices[Other->mesh->indices[j + 1]].position + Other->Offset;
-            glm::vec3 u2 = Other->mesh->vertices[Other->mesh->indices[j + 2]].position + Other->Offset;
+//         for (size_t j = 0; j < Other->mesh->indices.size(); j += 3)
+//         {
+//             glm::vec3 u0 = Other->mesh->vertices[Other->mesh->indices[j]].position + Other->Offset;
+//             glm::vec3 u1 = Other->mesh->vertices[Other->mesh->indices[j + 1]].position + Other->Offset;
+//             glm::vec3 u2 = Other->mesh->vertices[Other->mesh->indices[j + 2]].position + Other->Offset;
 
-            if (triangleIntersects(v0, v1, v2, u0, u1, u2))
-            {
-                return true; // Collision detected
-            }
-        }
-    }
+//             if (triangleIntersects(v0, v1, v2, u0, u1, u2))
+//             {
+//                 return true; // Collision detected
+//             }
+//         }
+//     }
 
-    return false; // No collision
-}
+//     return false; // No collision
+// }

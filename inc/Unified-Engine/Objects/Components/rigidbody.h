@@ -15,9 +15,11 @@ namespace UnifiedEngine
         glm::vec3 RotationLock = glm::vec3(1.0);
 
         int Mass = 1;
-        int Gravity = -9.8;
+        double Gravity = -9.8;
         int FrictionLevel = 0;
+        double DragFactor = 10;
 
+        glm::vec3 Acceleration = glm::vec3(0.0);
         glm::vec3 Velocity = glm::vec3(0.0);
 
         bool Friction = true;

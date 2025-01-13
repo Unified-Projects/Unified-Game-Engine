@@ -90,17 +90,17 @@ int Camera::Update(){
         
         this->AdjustedRotation = glm::vec3(glm::degrees(new_pitch), glm::degrees(yaw), glm::degrees(new_roll));
 
-        if(this->OldAdjustedRotation == glm::vec3(-0.43f, 0.43f, -0.43f)){
-            this->OldAdjustedRotation = this->AdjustedRotation;
-        }
+        // if(this->OldAdjustedRotation == glm::vec3(-0.43f, 0.43f, -0.43f)){
+        //     this->OldAdjustedRotation = this->AdjustedRotation;
+        // }
     }
 
     //Children
     this->UpdateC();
 
-    this->OldAdjustedRotation = AdjustedRotation;
+    // this->OldAdjustedRotation = AdjustedRotation;
 
-    this->transformOld = this->transform;
+    // this->transformOld = this->transform;
     
     return 0;
 }

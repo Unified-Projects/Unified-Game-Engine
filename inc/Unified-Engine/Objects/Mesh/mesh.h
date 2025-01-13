@@ -5,6 +5,7 @@
 #include <GLM/vec2.hpp>
 #include <GLM/vec3.hpp>
 #include <float.h>
+#include <glm/common.hpp>
 
 namespace UnifiedEngine
 {   
@@ -39,6 +40,8 @@ namespace UnifiedEngine
                    (min.z <= other->max.z && max.z >= other->min.z);
         }
     };
+
+	AABB* computeAABB(const class Mesh* mesh);
 
 	//Main Body
 	struct Mesh

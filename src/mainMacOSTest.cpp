@@ -12,15 +12,24 @@
 
 
 #include <Unified-Engine/Objects/Components/collider.h>
+#include <Unified-Engine/Objects/Components/rigidbody.h>
 
 class CameraControl : public UnifiedEngine::ScriptableObject{
 public:
     UnifiedEngine::GameObject* OBJ;
+    UnifiedEngine::RigidBody* RB;
 
-    CameraControl(UnifiedEngine::GameObject* Par, UnifiedEngine::ObjectComponent* Camera)
+    glm::vec3 CamRotation = glm::vec3(0.f, 0.f, 0.f);
+
+    bool Space = false;
+    bool GToggle = false;
+    double GToggleTime = 0.0;
+
+    CameraControl(UnifiedEngine::GameObject* Par, UnifiedEngine::ObjectComponent* Camera, UnifiedEngine::RigidBody* RigidB)
         : UnifiedEngine::ScriptableObject(Par)
     {
         OBJ = Par;
+        RB = RigidB;
 
         OBJ = Par;
         OBJ->Name = "CamCam";
@@ -29,56 +38,95 @@ public:
 
         this->OBJ->Children.push_back(Camera);
         Camera->Parent = OBJ;
+
+        RB->UseGravity = false;
     }
 
-    int Update(){
-        //Player Movement
+    int Update() {
+        // Get the camera directions
+        glm::vec3 viewRight = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->GetViewRight();
+        glm::vec3 viewFront = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.front();
+
+        // Project `viewRight` and `viewFront` onto the horizontal plane (y = 0)
+        viewRight.y = 0.0f;
+        viewFront.y = 0.0f;
+
+        // Normalize the vectors to ensure consistent movement speed
+        if (glm::length(viewRight) > 0.0f) viewRight = glm::normalize(viewRight);
+        if (glm::length(viewFront) > 0.0f) viewFront = glm::normalize(viewFront);
+
+        // Movement input initialization
+        glm::vec3 movementInput = glm::vec3(0.0f);
+
+        // Update GToggleTime if Space or GToggle is active
+        if (Space || GToggle) {
+            GToggleTime += UnifiedEngine::Time.DeltaTime;
+        }
+
+        // Reset GToggle and Space after a timeout
+        if (GToggleTime > 2) {
+            GToggle = false;
+            Space = false;
+            GToggleTime = 0.0;
+        }
+
+        // Movement input calculations
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_W))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.front() * UnifiedEngine::Time.DeltaTime;
+            movementInput += viewFront;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_A))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.right() * UnifiedEngine::Time.DeltaTime;
+            movementInput -= viewRight;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_S))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.front() * UnifiedEngine::Time.DeltaTime;
+            movementInput -= viewFront;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_D))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.right() * UnifiedEngine::Time.DeltaTime;
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_SPACE))
-            this->OBJ->transform.Position += 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.up() * UnifiedEngine::Time.DeltaTime;
-        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_LEFT_SHIFT))
-            this->OBJ->transform.Position -= 1.f*UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.up() * UnifiedEngine::Time.DeltaTime;
-        
+            movementInput += viewRight;
 
-        //Player Rotation
+        // Handle space key logic for gravity toggle
+        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_SPACE)) {
+            movementInput += UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->GetWorldUp();
+
+            if (!Space) {
+                // First press of space
+                Space = true;
+                if (GToggle && GToggleTime < 1) {
+                    // Double-tap detected, toggle gravity
+                    RB->UseGravity = !RB->UseGravity;
+                    // Reset toggling states to avoid multiple toggles within the same double-tap
+                    GToggle = false;
+                    GToggleTime = 0.0;
+                } else {
+                    // Start double-tap timer
+                    GToggle = true;
+                    GToggleTime = 0.0;
+                }
+            }
+        } else {
+            // Reset Space when the key is released
+            Space = false;
+        }
+
+        // Normalize the movement input to avoid faster diagonal movement
+        if (glm::length(movementInput) > 0.0f)
+            movementInput = glm::normalize(movementInput);
+
+        // Normalize input to ensure consistent movement speed
+        if (glm::length(movementInput) > 0.0f)
+            movementInput = glm::normalize(movementInput);
+
+        // Apply movement input to the rigid body as acceleration
+        RB->Velocity += movementInput * glm::vec3(2.0f, 2.0f, 2.0f); // Adjust multiplier for movement force
+
+        // Player Rotation
         glm::vec2 mPos = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Mouse.GetPosition();
-
-        //Update pitch yaw and roll
-        glm::vec3 threeDRotation = glm::vec3(-static_cast<GLfloat>(mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime, -static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime, 0);
+        float yDiff = (CamRotation.x - (mPos.y * 10.f * UnifiedEngine::Time.DeltaTime)) - glm::clamp((CamRotation.x - (mPos.y * 10.f * UnifiedEngine::Time.DeltaTime)), -85.f, 85.f);
+        
+        // Update pitch, yaw, and roll
+        glm::vec3 threeDRotation = glm::vec3(
+            -((yDiff) ? 0 : mPos.y) * 10.f * UnifiedEngine::Time.DeltaTime,
+            -static_cast<GLfloat>(mPos.x) * 10.f * UnifiedEngine::Time.DeltaTime,
+            0.0f
+        );
+        CamRotation += threeDRotation;
         UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->transform.Rotate(threeDRotation);
-
-        //Resolution with scroll
-        UnifiedEngine::WindowConfig conf = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->__windows.front()->Config();
-
-        int scroll = UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Mouse.Scroll();
-
-        if(scroll == 1){
-            conf.res_x *= 2;
-            conf.res_y *= 2;
-        }
-        else if(scroll == -1){
-            conf.res_x /= 2;
-            conf.res_y /= 2;
-        }
-
-        if (conf.res_x <= 80)
-            conf.res_x = 80;
-        if (conf.res_y <= 45)
-            conf.res_y = 45;
-
-        if (conf.res_x >= 1280)
-            conf.res_x = 1280;
-        if (conf.res_y >= 720)
-            conf.res_y = 720;
-
-        UnifiedEngine::__GAME__GLOBAL__INSTANCE__->__windows.front()->LoadWindowConfig(conf);
 
         return 0;
     }
@@ -112,11 +160,9 @@ int main(){
     UnifiedEngine::Mesh mesh;
     mesh = UnifiedEngine::Cube();
 
-    UnifiedEngine::MeshCollider Col1 = {};
-    Col1.mesh = &mesh;
-    Col1.Offset = glm::vec3(1, 1, 1);
-    UnifiedEngine::MeshCollider Col2 = {};
-    Col2.mesh = &mesh;
+    UnifiedEngine::BoxCollider Col1(nullptr, UnifiedEngine::computeAABB(&mesh));
+    Col1.Offset = glm::vec3(0, 2, 0.5);
+    UnifiedEngine::BoxCollider Col2(nullptr, UnifiedEngine::computeAABB(&mesh));
 
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
@@ -133,7 +179,8 @@ int main(){
     UnifiedEngine::InputPointer->Mouse.Cursor.Locked();
 
     UnifiedEngine::GameObject CamOBJ(UnifiedEngine::Mesh{}, nullptr);
-    CameraControl Controller(&CamOBJ, &Cam);
+    UnifiedEngine::RigidBody RB(&CamOBJ);
+    CameraControl Controller(&CamOBJ, &Cam, &RB);
 
     // Game loop
     while (!glfwWindowShouldClose(GameWindow.Context()))
@@ -149,7 +196,7 @@ int main(){
             break;
         }
 
-        LOG(Col1.intersects(&Col2));
+        LOG(Col1^Col2);
 
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Render()){
             FAULT("GAME_INSTANCE::FAILED TO RENDER!");
