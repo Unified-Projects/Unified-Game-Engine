@@ -45,6 +45,8 @@ namespace UnifiedEngine
         GameObject(GameObject* _parent, Mesh _mesh, ShaderObject* _shader);
         ~GameObject();
 
+        int ReplaceMesh(Mesh newMesh);
+
     public:
         int Update() override;
         int Render() override;

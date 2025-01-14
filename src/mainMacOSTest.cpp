@@ -216,7 +216,8 @@ int main(){
 
     UnifiedEngine::InputPointer->Mouse.Cursor.Locked();
 
-    UnifiedEngine::GameObject CamOBJ(UnifiedEngine::Mesh{}, nullptr);
+    UnifiedEngine::Mesh Blank = UnifiedEngine::Mesh{};
+    UnifiedEngine::GameObject CamOBJ(Blank, nullptr);
     UnifiedEngine::RigidBody RB(&CamOBJ);
     UnifiedEngine::BoxCollider CamBox(&CamOBJ, UnifiedEngine::computeAABB(&mesh));
     CamBox.Offset = glm::vec3(0, -1, 0);

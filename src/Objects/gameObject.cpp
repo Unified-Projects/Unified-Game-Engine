@@ -110,6 +110,14 @@ glm::mat4 CalculateModelMatrix(Transform transform, glm::vec3 origin){
     return Matrix;
 }
 
+int GameObject::ReplaceMesh(Mesh newMesh){
+    //Initialse Values
+    this->mesh = std::move(newMesh);
+
+    if(this->mesh.vertices.size())
+        this->GenerateVAOBuffers();
+}
+
 int GameObject::Update(){
     this->ModelMatrix = CalculateModelMatrix(this->transform, this->transform.Position);
     // this->ModelMatrix = CalculateModelMatrix(this->transform, glm::vec3(0.0f));
