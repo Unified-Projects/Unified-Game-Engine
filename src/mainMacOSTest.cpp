@@ -14,6 +14,39 @@
 #include <Unified-Engine/Objects/Components/collider.h>
 #include <Unified-Engine/Objects/Components/rigidbody.h>
 
+void ResolveCollision(glm::vec3& CamPosition, glm::vec3& Velocity, const glm::vec3& ColliderPosition, const glm::vec3& ColliderSize) {
+    // Define half-sizes for the collider and camera for AABB collision handling
+    glm::vec3 halfSize = ColliderSize * 0.5f;
+
+    // Calculate the difference between the camera and collider positions
+    glm::vec3 delta = CamPosition - ColliderPosition;
+
+    // Check if there's an overlap along each axis
+    glm::vec3 overlap = glm::vec3(
+        halfSize.x - std::abs(delta.x),
+        halfSize.y - std::abs(delta.y),
+        halfSize.z - std::abs(delta.z)
+    );
+
+    // If all components of overlap are positive, there's a collision
+    if (overlap.x > 0 && overlap.y > 0 && overlap.z > 0) {
+        // Find the axis of minimum overlap (smallest penetration depth)
+        if (overlap.x < overlap.y && overlap.x < overlap.z) {
+            // Collision along X-axis
+            Velocity.x = 0; // Cancel velocity along X
+            CamPosition.x = ColliderPosition.x + (delta.x > 0 ? halfSize.x : -halfSize.x); // Resolve position
+        } else if (overlap.y < overlap.x && overlap.y < overlap.z) {
+            // Collision along Y-axis
+            Velocity.y = 0; // Cancel velocity along Y
+            CamPosition.y = ColliderPosition.y + (delta.y > 0 ? halfSize.y : -halfSize.y); // Resolve position
+        } else {
+            // Collision along Z-axis
+            Velocity.z = 0; // Cancel velocity along Z
+            CamPosition.z = ColliderPosition.z + (delta.z > 0 ? halfSize.z : -halfSize.z); // Resolve position
+        }
+    }
+}
+
 class CameraControl : public UnifiedEngine::ScriptableObject{
 public:
     UnifiedEngine::GameObject* OBJ;
@@ -79,6 +112,8 @@ public:
             movementInput -= viewFront;
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_D))
             movementInput += viewRight;
+        if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_LEFT_SHIFT))
+            movementInput -= UnifiedEngine::__GAME__GLOBAL__INSTANCE__->GetMainCamera()->GetWorldUp();
 
         // Handle space key logic for gravity toggle
         if (UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Input->Keyboard.KeyPressed(UnifiedEngine::Key_SPACE)) {
@@ -103,6 +138,7 @@ public:
             // Reset Space when the key is released
             Space = false;
         }
+        
 
         // Normalize the movement input to avoid faster diagonal movement
         if (glm::length(movementInput) > 0.0f)
@@ -161,18 +197,20 @@ int main(){
     mesh = UnifiedEngine::Cube();
 
     UnifiedEngine::BoxCollider Col1(nullptr, UnifiedEngine::computeAABB(&mesh));
-    Col1.Offset = glm::vec3(0, 2, 0.5);
+    Col1.Offset = glm::vec3(-5, 2, 0.5);
     UnifiedEngine::BoxCollider Col2(nullptr, UnifiedEngine::computeAABB(&mesh));
+    Col2.Offset = glm::vec3(-5, 0, 0);
 
     // Create a game object that is in view
     UnifiedEngine::GameObject gOBJ(mesh, &shaderObj);
-    gOBJ.transform.Position.x -= 5;
+    // gOBJ.transform.Position.x -= 5;
+    gOBJ.transform.Position = Col2.Offset;
     gOBJ.transform.SetRotation(glm::vec3(0, 0, 0));
     UnifiedEngine::instantiate(&gOBJ);
     
     UnifiedEngine::GameObject gOBJ2(mesh, &shaderObj2);
     gOBJ2.transform.Position = Col1.Offset;
-    gOBJ2.transform.Position.x -= 5;
+    // gOBJ2.transform.Position.x -= 5;
     gOBJ2.transform.SetRotation(glm::vec3(0, 0, 0));
     UnifiedEngine::instantiate(&gOBJ2);
 
@@ -180,6 +218,8 @@ int main(){
 
     UnifiedEngine::GameObject CamOBJ(UnifiedEngine::Mesh{}, nullptr);
     UnifiedEngine::RigidBody RB(&CamOBJ);
+    UnifiedEngine::BoxCollider CamBox(&CamOBJ, UnifiedEngine::computeAABB(&mesh));
+    CamBox.Offset = glm::vec3(0, -1, 0);
     CameraControl Controller(&CamOBJ, &Cam, &RB);
 
     // Game loop
@@ -196,7 +236,22 @@ int main(){
             break;
         }
 
-        LOG(Col1^Col2);
+        CamBox.Offset = CamOBJ.transform.Position;
+        LOG(CamBox^Col2, " ", CamBox^Col1);
+
+        if(CamBox^Col2){
+            // Assuming CamBox^Col2 has detected a collision
+            glm::vec3 CamPosition = CamOBJ.transform.Position;
+            glm::vec3 ColliderPosition = gOBJ.transform.Position;
+            glm::vec3 ColliderSize = glm::vec3(2.0f, 2.0f, 2.0f); // Example size
+            glm::vec3& Velocity = RB.Velocity;
+
+            ResolveCollision(CamPosition, Velocity, ColliderPosition, ColliderSize);
+
+            // Update positions
+            CamOBJ.transform.Position = CamPosition;
+            RB.Velocity = Velocity;
+        }
 
         if(UnifiedEngine::__GAME__GLOBAL__INSTANCE__->Render()){
             FAULT("GAME_INSTANCE::FAILED TO RENDER!");

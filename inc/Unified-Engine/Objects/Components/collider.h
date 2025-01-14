@@ -27,7 +27,6 @@ namespace UnifiedEngine
 
     class BoxCollider : public Collider{
     public:
-        glm::vec3 Size = glm::vec3(0.0f);
         AABB* BoundingBox = nullptr;
     public:
         BoxCollider(ObjectComponent* Parent, AABB* BB) : Collider(Parent, COLLIDER_BOX), BoundingBox(BB) {};
