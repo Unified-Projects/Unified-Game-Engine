@@ -32,7 +32,7 @@ int RigidBody::Update(){
 
     // Apply drag to the velocity
     if (glm::length(this->Velocity) > 0.0f) {
-        glm::vec3 dragForce = glm::normalize(this->Velocity) * glm::length(this->Velocity) * glm::vec3(this->DragFactor, this->DragFactor, this->DragFactor);
+        glm::vec3 dragForce = glm::normalize(this->Velocity) * glm::length(this->Velocity) * this->DragFactor;
         this->Velocity -= dragForce * Time.DeltaTime;
     }
 

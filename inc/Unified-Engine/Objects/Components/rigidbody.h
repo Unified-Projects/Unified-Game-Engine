@@ -17,7 +17,7 @@ namespace UnifiedEngine
         int Mass = 1;
         double Gravity = -9.8;
         int FrictionLevel = 0;
-        double DragFactor = 10;
+        glm::vec3 DragFactor = glm::vec3(10, 1, 10);
 
         glm::vec3 Acceleration = glm::vec3(0.0);
         glm::vec3 Velocity = glm::vec3(0.0);
